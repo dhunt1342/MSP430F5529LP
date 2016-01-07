@@ -1,0 +1,1351 @@
+
+/* ########################################################################## */
+/*
+ * This file was created by www.DavesMotleyProjects.com
+ *
+ * This software is provided under the following conditions:
+ * Permission is hereby granted, free of charge, to any person obtaining
+ * a copy of this software and associated documentation files (the
+ * 'Software'), to deal in the Software without restriction, including
+ * without limitation the rights to use, copy, modify, merge, publish,
+ * distribute, sublicense, and/or sell copies of the Software, and to
+ * permit persons to whom the Software is furnished to do so, subject to
+ * the following conditions:
+ *
+ * THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND,
+ * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+ * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+ * IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+ * CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+ * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+ * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ *                                                                            */
+/* ########################################################################## */
+
+
+/* ===========================================================================*/
+/*
+ * FileName:      MSP430F5529LP.gel
+ *
+ * This file provides the register definitions for the Texas Instruments 
+ * MSP430F5529 Launchpad development board. This file is loaded by the
+ * debugger and provides the ability to view the register structures.
+ *
+ * Version 1.0
+ *
+ * Rev. 1.0, Initial Release
+ *
+ *                                                                            */
+/* ===========================================================================*/
+
+
+
+/*#########################################################################
+ *   ADC12
+*##########################################################################*/
+
+
+#define p_ADC12CTL0                 ((ADC12CTL0_t        *) 0x0700u)
+#define ADC12CTL0                   p_ADC12CTL0->reg
+#define ADC12CTL0_bits              p_ADC12CTL0->bits
+
+#define p_ADC12CTL1                 ((ADC12CTL1_t        *) 0x0702u)
+#define ADC12CTL1                   p_ADC12CTL1->reg
+#define ADC12CTL1_bits              p_ADC12CTL1->bits
+
+#define p_ADC12CTL2                 ((ADC12CTL2_t        *) 0x0704u)
+#define ADC12CTL2                   p_ADC12CTL2->reg
+#define ADC12CTL2_bits              p_ADC12CTL2->bits
+
+#define p_ADC12IFG                  ((ADC12IFG_t        *) 0x070Au)
+#define ADC12IFG                    p_ADC12IFG->reg
+#define ADC12IFG_bits               p_ADC12IFG->bits
+
+#define p_ADC12IE                   ((ADC12IE_t        *) 0x070Cu)
+#define ADC12IE                     p_ADC12IE->reg
+#define ADC12IE_bits                p_ADC12IE->bits
+
+
+/* ADC12+ Interrupt Vector Word */
+
+#define p_ADC12IV               ((ADC12IV_t     *) 0x070Eu)
+#define ADC12IV                 *p_ADC12IV
+
+/* ADC12 Conversion Memory */
+
+#define p_ADC12MEM0               ((ADC12MEMx_t     *) 0x0720u)
+#define ADC12MEM0                 *p_ADC12MEM0
+
+#define p_ADC12MEM1               ((ADC12MEMx_t     *) 0x0722u)
+#define ADC12MEM1                 *p_ADC12MEM1
+
+#define p_ADC12MEM2               ((ADC12MEMx_t     *) 0x0724u)
+#define ADC12MEM2                 *p_ADC12MEM2
+
+#define p_ADC12MEM3               ((ADC12MEMx_t     *) 0x0726u)
+#define ADC12MEM3                 *p_ADC12MEM3
+
+#define p_ADC12MEM4               ((ADC12MEMx_t     *) 0x0728u)
+#define ADC12MEM4                 *p_ADC12MEM4
+
+#define p_ADC12MEM5               ((ADC12MEMx_t     *) 0x072Au)
+#define ADC12MEM5                 *p_ADC12MEM5
+
+#define p_ADC12MEM6               ((ADC12MEMx_t     *) 0x072Cu)
+#define ADC12MEM6                 *p_ADC12MEM6
+
+#define p_ADC12MEM7               ((ADC12MEMx_t     *) 0x072Eu)
+#define ADC12MEM7                 *p_ADC12MEM7
+
+#define p_ADC12MEM8               ((ADC12MEMx_t     *) 0x0730u)
+#define ADC12MEM8                 *p_ADC12MEM8
+
+#define p_ADC12MEM9               ((ADC12MEMx_t     *) 0x0732u)
+#define ADC12MEM9                 *p_ADC12MEM9
+
+#define p_ADC12MEM10              ((ADC12MEMx_t     *) 0x0734u)
+#define ADC12MEM10                *p_ADC12MEM10
+
+#define p_ADC12MEM11              ((ADC12MEMx_t     *) 0x0736u)
+#define ADC12MEM11                *p_ADC12MEM11
+
+#define p_ADC12MEM12              ((ADC12MEMx_t     *) 0x0738u)
+#define ADC12MEM12                *p_ADC12MEM12
+
+#define p_ADC12MEM13              ((ADC12MEMx_t     *) 0x073Au)
+#define ADC12MEM13                *p_ADC12MEM13
+
+#define p_ADC12MEM14              ((ADC12MEMx_t     *) 0x073Cu)
+#define ADC12MEM14                *p_ADC12MEM14
+
+#define p_ADC12MEM15              ((ADC12MEMx_t     *) 0x073Eu)
+#define ADC12MEM15                *p_ADC12MEM15
+
+
+/* ADC12 Memory Control x */
+
+#define p_ADC12MCTL0                ((ADC12MCTLx_t        *) 0x0710u)
+#define ADC12MCTL0                  p_ADC12MCTL0->reg
+#define ADC12MCTL0_bits             p_ADC12MCTL0->bits
+
+#define p_ADC12MCTL1                ((ADC12MCTLx_t        *) 0x0711u)
+#define ADC12MCTL1                  p_ADC12MCTL1->reg
+#define ADC12MCTL1_bits             p_ADC12MCTL1->bits
+
+#define p_ADC12MCTL2                ((ADC12MCTLx_t        *) 0x0712u)
+#define ADC12MCTL2                  p_ADC12MCTL2->reg
+#define ADC12MCTL2_bits             p_ADC12MCTL2->bits
+
+#define p_ADC12MCTL3                ((ADC12MCTLx_t        *) 0x0713u)
+#define ADC12MCTL3                  p_ADC12MCTL3->reg
+#define ADC12MCTL3_bits             p_ADC12MCTL3->bits
+
+#define p_ADC12MCTL4                ((ADC12MCTLx_t        *) 0x0714u)
+#define ADC12MCTL4                  p_ADC12MCTL4->reg
+#define ADC12MCTL4_bits             p_ADC12MCTL4->bits
+
+#define p_ADC12MCTL5                ((ADC12MCTLx_t        *) 0x0715u)
+#define ADC12MCTL5                  p_ADC12MCTL5->reg
+#define ADC12MCTL5_bits             p_ADC12MCTL5->bits
+
+#define p_ADC12MCTL6                ((ADC12MCTLx_t        *) 0x0716u)
+#define ADC12MCTL6                  p_ADC12MCTL6->reg
+#define ADC12MCTL6_bits             p_ADC12MCTL6->bits
+
+#define p_ADC12MCTL7                ((ADC12MCTLx_t        *) 0x0717u)
+#define ADC12MCTL7                  p_ADC12MCTL7->reg
+#define ADC12MCTL7_bits             p_ADC12MCTL7->bits
+
+#define p_ADC12MCTL8                ((ADC12MCTLx_t        *) 0x0718u)
+#define ADC12MCTL8                  p_ADC12MCTL8->reg
+#define ADC12MCTL8_bits             p_ADC12MCTL8->bits
+
+#define p_ADC12MCTL9                ((ADC12MCTLx_t        *) 0x0719u)
+#define ADC12MCTL9                  p_ADC12MCTL9->reg
+#define ADC12MCTL9_bits             p_ADC12MCTL9->bits
+
+#define p_ADC12MCTL10               ((ADC12MCTLx_t        *) 0x071Au)
+#define ADC12MCTL10                 p_ADC12MCTL10->reg
+#define ADC12MCTL10_bits            p_ADC12MCTL10->bits
+
+#define p_ADC12MCTL11               ((ADC12MCTLx_t        *) 0x071Bu)
+#define ADC12MCTL11                 p_ADC12MCTL11->reg
+#define ADC12MCTL11_bits            p_ADC12MCTL11->bits
+
+#define p_ADC12MCTL12               ((ADC12MCTLx_t        *) 0x071Cu)
+#define ADC12MCTL12                 p_ADC12MCTL12->reg
+#define ADC12MCTL12_bits            p_ADC12MCTL12->bits
+
+#define p_ADC12MCTL13               ((ADC12MCTLx_t        *) 0x071Du)
+#define ADC12MCTL13                 p_ADC12MCTL13->reg
+#define ADC12MCTL13_bits            p_ADC12MCTL13->bits
+
+#define p_ADC12MCTL14               ((ADC12MCTLx_t        *) 0x071Eu)
+#define ADC12MCTL14                 p_ADC12MCTL14->reg
+#define ADC12MCTL14_bits            p_ADC12MCTL14->bits
+
+#define p_ADC12MCTL15               ((ADC12MCTLx_t        *) 0x071Fu)
+#define ADC12MCTL15                 p_ADC12MCTL15->reg
+#define ADC12MCTL15_bits            p_ADC12MCTL15->bits
+
+
+/*   ADC12 Interrupt Vector Sources   */
+#define ADC12IV_NONE                0x00u
+#define ADC12IV_ADC12MEMx_OVFL      0x02u
+#define ADC12IV_ADC12CONV_OVFL      0x04u
+#define ADC12IV_ADC12MEM0_IFG       0x06u
+#define ADC12IV_ADC12MEM1_IFG       0x08u
+#define ADC12IV_ADC12MEM2_IFG       0x0Au
+#define ADC12IV_ADC12MEM3_IFG       0x0Cu
+#define ADC12IV_ADC12MEM4_IFG       0x0Eu
+#define ADC12IV_ADC12MEM5_IFG       0x10u
+#define ADC12IV_ADC12MEM6_IFG       0x12u
+#define ADC12IV_ADC12MEM7_IFG       0x14u
+#define ADC12IV_ADC12MEM8_IFG       0x16u
+#define ADC12IV_ADC12MEM9_IFG       0x18u
+#define ADC12IV_ADC12MEM10_IFG      0x1Au
+#define ADC12IV_ADC12MEM11_IFG      0x1Cu
+#define ADC12IV_ADC12MEM12_IFG      0x1Eu
+#define ADC12IV_ADC12MEM13_IFG      0x20u
+#define ADC12IV_ADC12MEM14_IFG      0x22u
+#define ADC12IV_ADC12MEM15_IFG      0x24u
+
+
+
+
+
+
+
+/*#########################################################################
+ *   Comparator B
+*##########################################################################*/
+
+    // Not supported yet
+
+
+
+/*#########################################################################
+ *   CRC16
+*##########################################################################*/
+
+    // Not supported yet
+
+
+
+/*#########################################################################
+ *   DMA
+*##########################################################################*/
+
+// Not supported yet
+
+
+
+/*#########################################################################
+ *   Flash
+*##########################################################################*/
+
+// Not supported yet
+
+
+
+/*#########################################################################
+ *   MPY 16  Multiplier  16 Bit Mode
+*##########################################################################*/
+
+// Not supported yet
+
+
+
+/*#########################################################################
+ *   MPY 32  Multiplier  32 Bit Mode
+*##########################################################################*/
+
+// Not supported yet
+
+
+
+/*#############################################################################
+ *
+ *   Port A (16-bit access), Ports 1 & 2 (8-bit access)
+ *
+*############################################################################*/
+
+
+/*%%%%% INPUT %%%%%*/
+
+#define p_P1IN                  ((P1IN_t        *) 0x0200u)
+#define P1IN                    p_P1IN->reg
+#define P1IN_bits               p_P1IN->bits
+
+#define p_P2IN                  ((P2IN_t        *) 0x0201u)
+#define P2IN                    p_P2IN->reg
+#define P2IN_bits               p_P2IN->bits
+
+#define p_PAIN                  ((PAIN_t        *) 0x0200u)
+#define PAIN                    p_PAIN->reg
+#define PAIN_bits               p_PAIN->bits
+
+/*%%%%% OUTPUT %%%%%*/
+
+#define p_P1OUT                 ((P1OUT_t       *) 0x0202u)
+#define P1OUT                   p_P1OUT->reg
+#define P1OUT_bits              p_P1OUT->bits
+
+#define p_P2OUT                 ((P2OUT_t       *) 0x0203u)
+#define P2OUT                   p_P2OUT->reg
+#define P2OUT_bits              p_P2OUT->bits
+
+#define p_PAOUT                 ((PAOUT_t       *) 0x0202u)
+#define PAOUT                   p_PAOUT->reg
+#define PAOUT_bits              p_PAOUT->bits
+
+/*%%%%% DIRECTION %%%%%*/
+
+#define p_P1DIR                 ((P1DIR_t       *) 0x0204u)
+#define P1DIR                   p_P1DIR->reg
+#define P1DIR_bits              p_P1DIR->bits
+
+#define p_P2DIR                 ((P2DIR_t       *) 0x0205u)
+#define P2DIR                   p_P2DIR->reg
+#define P2DIR_bits              p_P2DIR->bits
+
+#define p_PADIR                 ((PADIR_t       *) 0x0204u)
+#define PADIR                   p_PADIR->reg
+#define PADIR_bits              p_PADIR->bits
+
+/*%%%%% RESISTOR ENABLE %%%%%*/
+
+#define p_P1REN                 ((P1REN_t       *) 0x0206u)
+#define P1REN                   p_P1REN->reg
+#define P1REN_bits              p_P1REN->bits
+
+#define p_P2REN                 ((P2REN_t       *) 0x0207u)
+#define P2REN                   p_P2REN->reg
+#define P2REN_bits              p_P2REN->bits
+
+#define p_PAREN                 ((PAREN_t       *) 0x0206u)
+#define PAREN                   p_PAREN->reg
+#define PAREN_bits              p_PAREN->bits
+
+/*%%%%% DRIVE STRENGTH %%%%%*/
+
+#define p_P1DS                  ((P1DS_t        *) 0x0208u)
+#define P1DS                    p_P1DS->reg
+#define P1DS_bits               p_P1DS->bits
+
+#define p_P2DS                  ((P2DS_t        *) 0x0209u)
+#define P2DS                    p_P2DS->reg
+#define P2DS_bits               p_P2DS->bits
+
+#define p_PADS                  ((PADS_t        *) 0x0208u)
+#define PADS                    p_PADS->reg
+#define PADS_bits               p_PADS->bits
+
+/*%%%%% SELECT %%%%%*/
+
+#define p_P1SEL                 ((P1SEL_t       *) 0x020Au)
+#define P1SEL                   p_P1SEL->reg
+#define P1SEL_bits              p_P1SEL->bits
+
+#define p_P2SEL                 ((P2SEL_t       *) 0x020Bu)
+#define P2SEL                   p_P2SEL->reg
+#define P2SEL_bits              p_P2SEL->bits
+
+#define p_PASEL                 ((PASEL_t       *) 0x020Au)
+#define PASEL                   p_PASEL->reg
+#define PASEL_bits              p_PASEL->bits
+
+/*%%%%% INTERRUPT VECTOR %%%%%*/
+
+#define p_P1IV                  ((P1IV_t       *) 0x020Eu)
+#define P1IV                    * p_P1IV
+
+#define p_P2IV                  ((P2IV_t       *) 0x021Eu)
+#define P2IV                    * p_P2IV
+
+/*%%%%% INTERRUPT EDGE SELECT %%%%%*/
+
+#define p_P1IES                 ((P1IES_t       *) 0x0218u)
+#define P1IES                   p_P1IES->reg
+#define P1IES_bits              p_P1IES->bits
+
+#define p_P2IES                 ((P2IES_t       *) 0x0219u)
+#define P2IES                   p_P2IES->reg
+#define P2IES_bits              p_P2IES->bits
+
+#define p_PAIES                 ((PAIES_t       *) 0x0218u)
+#define PAIES                   p_PAIES->reg
+#define PAIES_bits              p_PAIES->bits
+
+/*%%%%% INTERRUPT ENABLE %%%%%*/
+
+#define p_P1IE                  ((P1IE_t        *) 0x021Au)
+#define P1IE                    p_P1IE->reg
+#define P1IE_bits               p_P1IE->bits
+
+#define p_P2IE                  ((P2IE_t        *) 0x021Bu)
+#define P2IE                    p_P2IE->reg
+#define P2IE_bits               p_P2IE->bits
+
+#define p_PAIE                  ((PAIE_t        *) 0x021Au)
+#define PAIE                    p_PAIE->reg
+#define PAIE_bits               p_PAIE->bits
+
+/*%%%%% INTERRUPT FLAG %%%%%*/
+
+#define p_P1IFG                 ((P1IFG_t       *) 0x021Cu)
+#define P1IFG                   p_P1IFG->reg
+#define P1IFG_bits              p_P1IFG->bits
+
+#define p_P2IFG                 ((P2IFG_t       *) 0x021Du)
+#define P2IFG                   p_P2IFG->reg
+#define P2IFG_bits              p_P2IFG->bits
+
+#define p_PAIFG                 ((PAIFG_t       *) 0x021Cu)
+#define PAIFG                   p_PAIFG->reg
+#define PAIFG_bits              p_PAIFG->bits
+
+
+
+/*#############################################################################
+ *
+ *   Port B (16-bit access), Ports 3 & 4 (8-bit access)
+ *
+*############################################################################*/
+
+
+/*%%%%% INPUT %%%%%*/
+
+#define p_P3IN                  ((P3IN_t        *) 0x0220u)
+#define P3IN                    p_P3IN->reg
+#define P3IN_bits               p_P3IN->bits
+
+#define p_P4IN                  ((P4IN_t        *) 0x0221u)
+#define P4IN                    p_P4IN->reg
+#define P4IN_bits               p_P4IN->bits
+
+#define p_PBIN                  ((PBIN_t        *) 0x0220u)
+#define PBIN                    p_PBIN->reg
+#define PBIN_bits               p_PBIN->bits
+
+/*%%%%% OUTPUT %%%%%*/
+
+#define p_P3OUT                 ((P3OUT_t        *) 0x0222u)
+#define P3OUT                   p_P3OUT->reg
+#define P3OUT_bits              p_P3OUT->bits
+
+#define p_P4OUT                 ((P4OUT_t        *) 0x0223u)
+#define P4OUT                   p_P4OUT->reg
+#define P4OUT_bits              p_P4OUT->bits
+
+#define p_PBOUT                 ((PBOUT_t        *) 0x0222u)
+#define PBOUT                   p_PBOUT->reg
+#define PBOUT_bits              p_PBOUT->bits
+
+/*%%%%% DIRECTION %%%%%*/
+
+#define p_P3DIR                 ((P3DIR_t        *) 0x0224u)
+#define P3DIR                   p_P3DIR->reg
+#define P3DIR_bits              p_P3DIR->bits
+
+#define p_P4DIR                 ((P4DIR_t        *) 0x0225u)
+#define P4DIR                   p_P4DIR->reg
+#define P4DIR_bits              p_P4DIR->bits
+
+#define p_PBDIR                 ((PBDIR_t        *) 0x0224u)
+#define PBDIR                   p_PBDIR->reg
+#define PBDIR_bits              p_PBDIR->bits
+
+/*%%%%% RESISTOR ENABLE %%%%%*/
+
+#define p_P3REN                 ((P3REN_t        *) 0x0226u)
+#define P3REN                   p_P3REN->reg
+#define P3REN_bits              p_P3REN->bits
+
+#define p_P4REN                 ((P4REN_t        *) 0x0227u)
+#define P4REN                   p_P4REN->reg
+#define P4REN_bits              p_P4REN->bits
+
+#define p_PBREN                 ((PBREN_t        *) 0x0226u)
+#define PBREN                   p_PBREN->reg
+#define PBREN_bits              p_PBREN->bits
+
+/*%%%%% DRIVE STRENGTH %%%%%*/
+
+#define p_P3DS                  ((P3DS_t        *) 0x0228u)
+#define P3DS                    p_P3DS->reg
+#define P3DS_bits               p_P3DS->bits
+
+#define p_P4DS                  ((P4DS_t        *) 0x0229u)
+#define P4DS                    p_P4DS->reg
+#define P4DS_bits               p_P4DS->bits
+
+#define p_PBDS                  ((PBDS_t        *) 0x0228u)
+#define PBDS                    p_PBDS->reg
+#define PBDS_bits               p_PBDS->bits
+
+/*%%%%% SELECT %%%%%*/
+
+#define p_P3SEL                 ((P3SEL_t        *) 0x022Au)
+#define P3SEL                   p_P3SEL->reg
+#define P3SEL_bits              p_P3SEL->bits
+
+#define p_P4SEL                 ((P4SEL_t        *) 0x022Bu)
+#define P4SEL                   p_P4SEL->reg
+#define P4SEL_bits              p_P4SEL->bits
+
+#define p_PBSEL                 ((PBSEL_t        *) 0x022Au)
+#define PBSEL                   p_PBSEL->reg
+#define PBSEL_bits              p_PBSEL->bits
+
+
+
+/*#############################################################################
+ *
+ *   Port C (16-bit access), Ports 5 & 6 (8-bit access)
+ *
+*############################################################################*/
+
+
+/*%%%%% INPUT %%%%%*/
+
+#define p_P5IN                  ((P5IN_t        *) 0x0240u)
+#define P5IN                    p_P5IN->reg
+#define P5IN_bits               p_P5IN->bits
+
+#define p_P6IN                  ((P6IN_t        *) 0x0241u)
+#define P6IN                    p_P6IN->reg
+#define P6IN_bits               p_P6IN->bits
+
+#define p_PCIN                  ((PCIN_t        *) 0x0240u)
+#define PCIN                    p_PCIN->reg
+#define PCIN_bits               p_PCIN->bits
+
+/*%%%%% OUTPUT %%%%%*/
+
+#define p_P5OUT                 ((P5OUT_t        *) 0x0242u)
+#define P5OUT                   p_P5OUT->reg
+#define P5OUT_bits              p_P5OUT->bits
+
+#define p_P6OUT                 ((P6OUT_t        *) 0x0243u)
+#define P6OUT                   p_P6OUT->reg
+#define P6OUT_bits              p_P6OUT->bits
+
+#define p_PCOUT                 ((PCOUT_t        *) 0x0242u)
+#define PCOUT                   p_PCOUT->reg
+#define PCOUT_bits              p_PCOUT->bits
+
+/*%%%%% DIRECTION %%%%%*/
+
+#define p_P5DIR                 ((P5DIR_t        *) 0x0244u)
+#define P5DIR                   p_P5DIR->reg
+#define P5DIR_bits              p_P5DIR->bits
+
+#define p_P6DIR                 ((P6DIR_t        *) 0x0245u)
+#define P6DIR                   p_P6DIR->reg
+#define P6DIR_bits              p_P6DIR->bits
+
+#define p_PCDIR                 ((PCDIR_t        *) 0x0244u)
+#define PCDIR                   p_PCDIR->reg
+#define PCDIR_bits              p_PCDIR->bits
+
+/*%%%%% RESISTOR ENABLE %%%%%*/
+
+#define p_P5REN                 ((P5REN_t        *) 0x0246u)
+#define P5REN                   p_P5REN->reg
+#define P5REN_bits              p_P5REN->bits
+
+#define p_P6REN                 ((P6REN_t        *) 0x0247u)
+#define P6REN                   p_P6REN->reg
+#define P6REN_bits              p_P6REN->bits
+
+#define p_PCREN                 ((PCREN_t        *) 0x0246u)
+#define PCREN                   p_PCREN->reg
+#define PCREN_bits              p_PCREN->bits
+
+/*%%%%% DRIVE STRENGTH %%%%%*/
+
+#define p_P5DS                  ((P5DS_t        *) 0x0248u)
+#define P5DS                    p_P5DS->reg
+#define P5DS_bits               p_P5DS->bits
+
+#define p_P6DS                  ((P6DS_t        *) 0x0249u)
+#define P6DS                    p_P6DS->reg
+#define P6DS_bits               p_P6DS->bits
+
+#define p_PCDS                  ((PCDS_t        *) 0x0248u)
+#define PCDS                    p_PCDS->reg
+#define PCDS_bits               p_PCDS->bits
+
+/*%%%%% SELECT %%%%%*/
+
+#define p_P5SEL                 ((P5SEL_t        *) 0x024Au)
+#define P5SEL                   p_P5SEL->reg
+#define P5SEL_bits              p_P5SEL->bits
+
+#define p_P6SEL                 ((P6SEL_t        *) 0x024Bu)
+#define P6SEL                   p_P6SEL->reg
+#define P6SEL_bits              p_P6SEL->bits
+
+#define p_PCSEL                 ((PCSEL_t        *) 0x024Au)
+#define PCSEL                   p_PCSEL->reg
+#define PCSEL_bits              p_PCSEL->bits
+
+
+
+/*#############################################################################
+ *
+ *   Port D (16-bit access), Ports 7 & 8 (8-bit access)
+ *
+*############################################################################*/
+
+
+/*%%%%% INPUT %%%%%*/
+
+#define p_P7IN                  ((P7IN_t        *) 0x0260u)
+#define P7IN                    p_P7IN->reg
+#define P7IN_bits               p_P7IN->bits
+
+#define p_P8IN                  ((P8IN_t        *) 0x0261u)
+#define P8IN                    p_P8IN->reg
+#define P8IN_bits               p_P8IN->bits
+
+#define p_PDIN                  ((PDIN_t        *) 0x0260u)
+#define PDIN                    p_PDIN->reg
+#define PDIN_bits               p_PDIN->bits
+
+/*%%%%% OUTPUT %%%%%*/
+
+#define p_P7OUT                 ((P7OUT_t        *) 0x0262u)
+#define P7OUT                   p_P7OUT->reg
+#define P7OUT_bits              p_P7OUT->bits
+
+#define p_P8OUT                 ((P8OUT_t        *) 0x0263u)
+#define P8OUT                   p_P8OUT->reg
+#define P8OUT_bits              p_P8OUT->bits
+
+#define p_PDOUT                 ((PDOUT_t        *) 0x0262u)
+#define PDOUT                   p_PDOUT->reg
+#define PDOUT_bits              p_PDOUT->bits
+
+/*%%%%% DIRECTION %%%%%*/
+
+#define p_P7DIR                 ((P7DIR_t        *) 0x0264u)
+#define P7DIR                   p_P7DIR->reg
+#define P7DIR_bits              p_P7DIR->bits
+
+#define p_P8DIR                 ((P8DIR_t        *) 0x0265u)
+#define P8DIR                   p_P8DIR->reg
+#define P8DIR_bits              p_P8DIR->bits
+
+#define p_PDDIR                 ((PDDIR_t        *) 0x0264u)
+#define PDDIR                   p_PDDIR->reg
+#define PDDIR_bits              p_PDDIR->bits
+
+/*%%%%% RESISTOR ENABLE %%%%%*/
+
+#define p_P7REN                 ((P7REN_t        *) 0x0266u)
+#define P7REN                   p_P7REN->reg
+#define P7REN_bits              p_P7REN->bits
+
+#define p_P8REN                 ((P8REN_t        *) 0x0267u)
+#define P8REN                   p_P8REN->reg
+#define P8REN_bits              p_P8REN->bits
+
+#define p_PDREN                 ((PDREN_t        *) 0x0266u)
+#define PDREN                   p_PDREN->reg
+#define PDREN_bits              p_PDREN->bits
+
+/*%%%%% DRIVE STRENGTH %%%%%*/
+
+#define p_P7DS                  ((P7DS_t        *) 0x0268u)
+#define P7DS                    p_P7DS->reg
+#define P7DS_bits               p_P7DS->bits
+
+#define p_P8DS                  ((P8DS_t        *) 0x0269u)
+#define P8DS                    p_P8DS->reg
+#define P8DS_bits               p_P8DS->bits
+
+#define p_PDDS                  ((PDDS_t        *) 0x0268u)
+#define PDDS                    p_PDDS->reg
+#define PDDS_bits               p_PDDS->bits
+
+/*%%%%% SELECT %%%%%*/
+
+#define p_P7SEL                 ((P7SEL_t        *) 0x026Au)
+#define P7SEL                   p_P7SEL->reg
+#define P7SEL_bits              p_P7SEL->bits
+
+#define p_P8SEL                 ((P8SEL_t        *) 0x026Bu)
+#define P8SEL                   p_P8SEL->reg
+#define P8SEL_bits              p_P8SEL->bits
+
+#define p_PDSEL                 ((PDSEL_t        *) 0x026Au)
+#define PDSEL                   p_PDSEL->reg
+#define PDSEL_bits              p_PDSEL->bits
+
+
+
+/*#############################################################################
+ *
+ *   Port J (8-bit access only)
+ *
+*############################################################################*/
+
+
+/*%%%%% INPUT %%%%%*/
+
+#define p_PJIN                  ((PJIN_t            *) 0x0320u)
+#define PJIN                    p_PJIN->reg
+#define PJIN_bits               p_PJIN->bits
+
+/*%%%%% OUTPUT %%%%%*/
+
+#define p_PJOUT                 ((PJOUT_t           *) 0x0322u)
+#define PJOUT                   p_PJOUT->reg
+#define PJOUT_bits              p_PJOUT->bits
+
+/*%%%%% DIRECTION %%%%%*/
+
+#define p_PJDIR                 ((PJDIR_t           *) 0x0324u)
+#define PJDIR                   p_PJDIR->reg
+#define PJDIR_bits              p_PJDIR->bits
+
+/*%%%%% RESISTOR ENABLE %%%%%*/
+
+#define p_PJREN                 ((PJREN_t           *) 0x0326u)
+#define PJREN                   p_PJREN->reg
+#define PJREN_bits              p_PJREN->bits
+
+/*%%%%% DRIVE STRENGTH %%%%%*/
+
+#define p_PJDS                  ((PJDS_t            *) 0x0328u)
+#define PJDS                    p_PJDS->reg
+#define PJDS_bits               p_PJDS->bits
+
+
+
+/*#########################################################################
+ *   Port Mapping Control
+*##########################################################################*/
+
+// Not supported yet
+
+
+
+/*#########################################################################
+ *   Port Mapping Port 4
+*##########################################################################*/
+
+// Not supported yet
+
+
+
+/*#########################################################################
+ *   PMM  Power Management System
+*##########################################################################*/
+
+
+#define p_PMMCTL0                ((PMMCTL0_t              *) 0x0120u)
+#define PMMCTL0                  *p_PMMCTL0
+
+#define p_PMMCTL1                ((PMMCTL1_t              *) 0x0122u)
+#define PMMCTL1                  *p_PMMCTL1
+
+#define p_SVSMHCTL              ((SVSMHCTL_t            *) 0x0124u)
+#define SVSMHCTL                p_SVSMHCTL->reg
+#define SVSMHCTL_bits           p_SVSMHCTL->bits
+
+#define p_SVSMLCTL              ((SVSMLCTL_t            *) 0x0126u)
+#define SVSMLCTL                p_SVSMLCTL->reg
+#define SVSMLCTL_bits           p_SVSMLCTL->bits
+
+#define p_SVSMIO                ((SVSMIO_t              *) 0x0128u)
+#define SVSMIO                  p_SVSMIO->reg
+#define SVSMIO_bits             p_SVSMIO->bits
+
+#define p_PMMIFG                ((PMMIFG_t              *) 0x012Cu)
+#define PMMIFG                  p_PMMIFG->reg
+#define PMMIFG_bits             p_PMMIFG->bits
+
+#define p_PMMRIE                ((PMMRIE_t              *) 0x012Eu)
+#define PMMRIE                  p_PMMRIE->reg
+#define PMMRIE_bits             p_PMMRIE->bits
+
+#define p_PM5CTL0               ((PM5CTL0_t             *) 0x0130u)
+#define PM5CTL0                 p_PM5CTL0->reg
+#define PM5CTL0_bits            p_PM5CTL0->bits
+
+
+
+/*#########################################################################
+ *   RC  RAM Control Module
+*##########################################################################*/
+
+// Not supported yet
+
+
+
+/*#########################################################################
+ *   Shared Reference
+*##########################################################################*/
+
+// Not supported yet
+
+
+
+/*#########################################################################
+ *   RTC  Real Time Clock
+*##########################################################################*/
+
+// Not supported yet
+
+
+
+/*#########################################################################
+ *   SFR  Special Function Registers
+ *#########################################################################*/
+
+
+#define p_SFRIE1            ((SFRIE1_t       *) 0x0100u)
+#define SFRIE1              p_SFRIE1->reg
+#define SFRIE1_bits         p_SFRIE1->bits
+
+#define p_SFRIFG1           ((SFRIFG1_t       *) 0x0102u)
+#define SFRIFG1             p_SFRIFG1->reg
+#define SFRIFG1_bits        p_SFRIFG1->bits
+
+#define p_SFRRPCR           ((SFRRPCR_t       *) 0x0104u)
+#define SFRRPCR             p_SFRRPCR->reg
+#define SFRRPCR_bits        p_SFRRPCR->bits
+
+
+
+/*#########################################################################
+ *   SYS  System Module
+ *#########################################################################*/
+
+// Not supported yet
+
+
+
+/*#########################################################################
+ *   Timer0_A5
+ *#########################################################################*/
+
+
+#define p_TA0CTL                ((TA0CTL_t              *) 0x0340u)
+#define TA0CTL                  p_TA0CTL->reg
+#define TA0CTL_bits             p_TA0CTL->bits
+
+#define p_TA0CCTL0              ((TA0CCTL0_t            *) 0x0342u)
+#define TA0CCTL0                p_TA0CCTL0->reg
+#define TA0CCTL0_bits           p_TA0CCTL0->bits
+
+#define p_TA0CCTL1              ((TA0CCTL1_t            *) 0x0344u)
+#define TA0CCTL1                p_TA0CCTL1->reg
+#define TA0CCTL1_bits           p_TA0CCTL1->bits
+
+#define p_TA0CCTL2              ((TA0CCTL2_t            *) 0x0346u)
+#define TA0CCTL2                p_TA0CCTL2->reg
+#define TA0CCTL2_bits           p_TA0CCTL2->bits
+
+#define p_TA0CCTL3              ((TA0CCTL3_t            *) 0x0348u)
+#define TA0CCTL3                p_TA0CCTL3->reg
+#define TA0CCTL3_bits           p_TA0CCTL3->bits
+
+#define p_TA0CCTL4              ((TA0CCTL4_t            *) 0x034Au)
+#define TA0CCTL4                p_TA0CCTL4->reg
+#define TA0CCTL4_bits           p_TA0CCTL4->bits
+
+  /* Timer0_A5 */
+#define p_TA0R                  ((TA0R_t        *) 0x0350u)
+#define TA0R                    *p_TA0R
+
+  /* Timer0_A5 Capture/Compare 0 */
+#define p_TA0CCR0               ((TA0CCR0_t     *) 0x0352u)
+#define TA0CCR0                 *p_TA0CCR0
+
+  /* Timer0_A5 Capture/Compare 1 */
+#define p_TA0CCR1               ((TA0CCR1_t     *) 0x0354u)
+#define TA0CCR1                 *p_TA0CCR1
+
+  /* Timer0_A5 Capture/Compare 2 */
+#define p_TA0CCR2               ((TA0CCR2_t     *) 0x0356u)
+#define TA0CCR2                 *p_TA0CCR2
+
+  /* Timer0_A5 Capture/Compare 3 */
+#define p_TA0CCR3               ((TA0CCR3_t     *) 0x0358u)
+#define TA0CCR3                 *p_TA0CCR3
+
+  /* Timer0_A5 Capture/Compare 4 */
+#define p_TA0CCR4               ((TA0CCR4_t     *) 0x035Au)
+#define TA0CCR4                 *p_TA0CCR4
+
+  /* Timer0_A5 Interrupt Vector Word */
+#define p_TA0IV                 ((TA0IV_t       *) 0x036Eu)
+#define TA0IV                   *p_TA0IV
+
+#define p_TA0EX0              ((TA0EX0_t        *) 0x0360u)
+#define TA0EX0                p_TA0EX0->reg
+#define TA0EX0_bits           p_TA0EX0->bits
+
+
+
+/*#########################################################################
+ *   Timer1_A3
+ *#########################################################################*/
+
+
+#define p_TA1CTL                ((TA1CTL_t          *) 0x0380u)
+#define TA1CTL                  p_TA1CTL->reg
+#define TA1CTL_bits             p_TA1CTL->bits
+
+#define p_TA1CCTL0              ((TA1CCTL0_t        *) 0x0382u)
+#define TA1CCTL0                p_TA1CCTL0->reg
+#define TA1CCTL0_bits           p_TA1CCTL0->bits
+
+#define p_TA1CCTL1              ((TA1CCTL1_t        *) 0x0384u)
+#define TA1CCTL1                p_TA1CCTL1->reg
+#define TA1CCTL1_bits           p_TA1CCTL1->bits
+
+#define p_TA1CCTL2              ((TA1CCTL2_t        *) 0x0386u)
+#define TA1CCTL2                p_TA1CCTL2->reg
+#define TA1CCTL2_bits           p_TA1CCTL2->bits
+
+  /* Timer1_A3 */
+#define p_TA1R                  ((TA1R_t        *) 0x0390u)
+#define TA1R                    *p_TA1R
+
+  /* Timer1_A3 Capture/Compare 0 */
+#define p_TA1CCR0               ((TA1CCR0_t     *) 0x0392u)
+#define TA1CCR0                 *p_TA1CCR0
+
+  /* Timer1_A3 Capture/Compare 1 */
+#define p_TA1CCR1               ((TA1CCR1_t     *) 0x0394u)
+#define TA1CCR1                 *p_TA1CCR1
+
+  /* Timer1_A3 Capture/Compare 2 */
+#define p_TA1CCR2               ((TA1CCR2_t     *) 0x0396u)
+#define TA1CCR2                 *p_TA1CCR2
+
+  /* Timer1_A3 Interrupt Vector Word */
+#define p_TA1IV                 ((TA1IV_t       *) 0x03AEu)
+#define TA1IV                   *p_TA1IV
+
+#define p_TA1EX0                ((TA1EX0_t      *) 0x03A0u)
+#define TA1EX0                  p_TA1EX0->reg
+#define TA1EX0_bits             p_TA1EX0->bits
+
+
+
+/*#########################################################################
+ *   Timer2_A3
+ *#########################################################################*/
+
+
+#define p_TA2CTL                ((TA2CTL_t          *) 0x0400u)
+#define TA2CTL                  p_TA2CTL->reg
+#define TA2CTL_bits             p_TA2CTL->bits
+
+#define p_TA2CCTL0              ((TA2CCTL0_t        *) 0x0402u)
+#define TA2CCTL0                p_TA2CCTL0->reg
+#define TA2CCTL0_bits           p_TA2CCTL0->bits
+
+#define p_TA2CCTL1              ((TA2CCTL1_t        *) 0x0404u)
+#define TA2CCTL1                p_TA2CCTL1->reg
+#define TA2CCTL1_bits           p_TA2CCTL1->bits
+
+#define p_TA2CCTL2              ((TA2CCTL2_t        *) 0x0406u)
+#define TA2CCTL2                p_TA2CCTL2->reg
+#define TA2CCTL2_bits           p_TA2CCTL2->bits
+
+  /* Timer2_A3 */
+#define p_TA2R                  ((TA2R_t        *) 0x0410u)
+#define TA2R                    *p_TA2R
+
+  /* Timer2_A3 Capture/Compare 0 */
+#define p_TA2CCR0               ((TA2CCR0_t     *) 0x0412u)
+#define TA2CCR0                 *p_TA2CCR0
+
+  /* Timer2_A3 Capture/Compare 1 */
+#define p_TA2CCR1               ((TA2CCR1_t     *) 0x0414u)
+#define TA2CCR1                 *p_TA2CCR1
+
+  /* Timer2_A3 Capture/Compare 2 */
+#define p_TA2CCR2               ((TA2CCR2_t     *) 0x0416u)
+#define TA2CCR2                 *p_TA2CCR2
+
+  /* Timer2_A3 Interrupt Vector Word */
+#define p_TA2IV                 ((TA2IV_t       *) 0x042Eu)
+#define TA2IV                   *p_TA2IV
+
+#define p_TA2EX0                ((TA2EX0_t      *) 0x0420u)
+#define TA2EX0                  p_TA2EX0->reg
+#define TA2EX0_bits             p_TA2EX0->bits
+
+
+
+/*#########################################################################
+ *   Timer0_B7
+*#########################################################################*/
+
+
+#define p_TB0CTL                ((TB0CTL_t          *) 0x03C0u)
+#define TB0CTL                  p_TB0CTL->reg
+#define TB0CTL_bits             p_TB0CTL->bits
+
+#define p_TB0CCTL0              ((TB0CCTL0_t        *) 0x03C2u)
+#define TB0CCTL0                p_TB0CCTL0->reg
+#define TB0CCTL0_bits           p_TB0CCTL0->bits
+
+#define p_TB0CCTL1              ((TB0CCTL1_t        *) 0x03C4u)
+#define TB0CCTL1                p_TB0CCTL1->reg
+#define TB0CCTL1_bits           p_TB0CCTL1->bits
+
+#define p_TB0CCTL2              ((TB0CCTL2_t        *) 0x03C6u)
+#define TB0CCTL2                p_TB0CCTL2->reg
+#define TB0CCTL2_bits           p_TB0CCTL2->bits
+
+#define p_TB0CCTL3              ((TB0CCTL3_t        *) 0x03C8u)
+#define TB0CCTL3                p_TB0CCTL3->reg
+#define TB0CCTL3_bits           p_TB0CCTL3->bits
+
+#define p_TB0CCTL4              ((TB0CCTL4_t        *) 0x03CAu)
+#define TB0CCTL4                p_TB0CCTL4->reg
+#define TB0CCTL4_bits           p_TB0CCTL4->bits
+
+#define p_TB0CCTL5              ((TB0CCTL5_t        *) 0x03CCu)
+#define TB0CCTL5                p_TB0CCTL5->reg
+#define TB0CCTL5_bits           p_TB0CCTL5->bits
+
+#define p_TB0CCTL6              ((TB0CCTL6_t        *) 0x03CEu)
+#define TB0CCTL6                p_TB0CCTL6->reg
+#define TB0CCTL6_bits           p_TB0CCTL6->bits
+
+
+  /* Timer0_B7 */
+#define p_TB0R                  ((TB0R_t        *) 0x03D0u)
+#define TB0R                    *p_TB0R
+
+  /* Timer0_B7 Capture/Compare 0 */
+#define p_TB0CCR0               ((TB0CCR0_t     *) 0x03D2u)
+#define TB0CCR0                 *p_TB0CCR0
+
+  /* Timer0_B7 Capture/Compare 1 */
+#define p_TB0CCR1               ((TB0CCR1_t     *) 0x03D4u)
+#define TB0CCR1                 *p_TB0CCR1
+
+  /* Timer0_B7 Capture/Compare 2 */
+#define p_TB0CCR2               ((TB0CCR2_t     *) 0x03D6u)
+#define TB0CCR2                 *p_TB0CCR2
+
+  /* Timer0_B7 Capture/Compare 3 */
+#define p_TB0CCR3               ((TB0CCR3_t     *) 0x03D8u)
+#define TB0CCR3                 *p_TB0CCR3
+
+  /* Timer0_B7 Capture/Compare 4 */
+#define p_TB0CCR4               ((TB0CCR4_t     *) 0x03DAu)
+#define TB0CCR4                 *p_TB0CCR4
+
+  /* Timer0_B7 Capture/Compare 5 */
+#define p_TB0CCR5               ((TB0CCR5_t     *) 0x03DCu)
+#define TB0CCR5                 *p_TB0CCR5
+
+  /* Timer0_B7 Capture/Compare 6 */
+#define p_TB0CCR6               ((TB0CCR6_t     *) 0x03DEu)
+#define TB0CCR6                 *p_TB0CCR6
+
+/* Timer0_B7 Interrupt Vector Word */
+#define p_TB0IV                 ((TB0IV_t       *) 0x03EEu)
+#define TB0IV                   *p_TB0IV
+
+#define p_TB0EX0                ((TB0EX0_t      *) 0x03E0u)
+#define TB0EX0                  p_TB0EX0->reg
+#define TB0EX0_bits             p_TB0EX0->bits
+
+
+
+/*#########################################################################
+ *   USB Configuration Registers
+ *#########################################################################*/
+
+// Not supported yet
+
+
+
+/*#########################################################################
+ *   USB Control Registers
+ *#########################################################################*/
+
+// Not supported yet
+
+
+
+/*#########################################################################
+ *   UCS  Unified System Clock
+ *#########################################################################*/
+
+
+#define p_UCSCTL0           ((UCSCTL0_t         *) 0x0160u)
+#define UCSCTL0             p_UCSCTL0->byte
+#define UCSCTL0_bits        p_UCSCTL0->bits
+
+#define p_UCSCTL1           ((UCSCTL1_t         *) 0x0162u)
+#define UCSCTL1             p_UCSCTL1->byte
+#define UCSCTL1_bits        p_UCSCTL1->bits
+
+#define p_UCSCTL2           ((UCSCTL2_t         *) 0x0164u)
+#define UCSCTL2             p_UCSCTL2->byte
+#define UCSCTL2_bits        p_UCSCTL2->bits
+
+#define p_UCSCTL3           ((UCSCTL3_t         *) 0x0166u)
+#define UCSCTL3             p_UCSCTL3->byte
+#define UCSCTL3_bits        p_UCSCTL3->bits
+
+#define p_UCSCTL4           ((UCSCTL4_t         *) 0x0168u)
+#define UCSCTL4             p_UCSCTL4->byte
+#define UCSCTL4_bits        p_UCSCTL4->bits
+
+#define p_UCSCTL5           ((UCSCTL5_t         *) 0x016Au)
+#define UCSCTL5             p_UCSCTL5->byte
+#define UCSCTL5_bits        p_UCSCTL5->bits
+
+#define p_UCSCTL6           ((UCSCTL6_t         *) 0x016Cu)
+#define UCSCTL6             p_UCSCTL6->byte
+#define UCSCTL6_bits        p_UCSCTL6->bits
+
+#define p_UCSCTL7           ((UCSCTL7_t         *) 0x016Eu)
+#define UCSCTL7             p_UCSCTL7->byte
+#define UCSCTL7_bits        p_UCSCTL7->bits
+
+#define p_UCSCTL8           ((UCSCTL8_t         *) 0x0170u)
+#define UCSCTL8             p_UCSCTL8->byte
+#define UCSCTL8_bits        p_UCSCTL8->bits
+
+
+
+/*#########################################################################
+ *   USCI_A0 & USCI_A1  UART and SPI Modes
+ *#########################################################################*/
+
+
+#define p_UCA0CTL1          ((UCAxCTL1_t         *) 0x05C0u)
+#define UCA0CTL1            p_UCA0CTL1->reg
+#define UCA0CTL1_bits       p_UCA0CTL1->bits
+
+#define p_UCA1CTL1          ((UCAxCTL1_t         *) 0x0600u)
+#define UCA1CTL1            p_UCA1CTL1->reg
+#define UCA1CTL1_bits       p_UCA1CTL1->bits
+
+#define p_UCA0CTL0          ((UCAxCTL0_t         *) 0x05C1u)
+#define UCA0CTL0            p_UCA0CTL0->reg
+#define UCA0CTL0_bits       p_UCA0CTL0->bits
+
+#define p_UCA1CTL0          ((UCAxCTL0_t         *) 0x0601u)
+#define UCA1CTL0            p_UCA1CTL0->reg
+#define UCA1CTL0_bits       p_UCA1CTL0->bits
+
+/* USCI baud rate 0 */
+#define p_UCA0BR0               ((UCAxBR0_t     *) 0x05C6u)
+#define UCA0BR0                 *p_UCA0BR0
+#define p_UCA1BR0               ((UCAxBR0_t     *) 0x0606u)
+#define UCA1BR0                 *p_UCA1BR0
+
+/* USCI baud rate 1 */
+#define p_UCA0BR1               ((UCAxBR1_t     *) 0x05C7u)
+#define UCA0BR1                 *p_UCA0BR1
+#define p_UCA1BR1               ((UCAxBR1_t     *) 0x0607u)
+#define UCA1BR1                 *p_UCA1BR1
+
+#define p_UCA0MCTL          ((UCAxMCTL_t         *) 0x05C8u)
+#define UCA0MCTL            p_UCA0MCTL->reg
+#define UCA0MCTL_bits       p_UCA0MCTL->bits
+
+#define p_UCA1MCTL          ((UCAxMCTL_t         *) 0x0608u)
+#define UCA1MCTL            p_UCA1MCTL->reg
+#define UCA1MCTL_bits       p_UCA1MCTL->bits
+
+#define p_UCA0STAT          ((UCAxSTAT_t         *) 0x05CAu)
+#define UCA0STAT            p_UCA0STAT->reg
+#define UCA0STAT_bits       p_UCA0STAT->bits
+
+#define p_UCA1STAT          ((UCAxSTAT_t         *) 0x060Au)
+#define UCA1STAT            p_UCA1STAT->reg
+#define UCA1STAT_bits       p_UCA1STAT->bits
+
+/* USCI receive buffer */
+#define p_UCA0RXBUF             ((UCAxRXBUF_t     *) 0x05CCu)
+#define UCA0RXBUF               *p_UCA0RXBUF
+#define p_UCA1RXBUF             ((UCAxRXBUF_t     *) 0x060Cu)
+#define UCA1RXBUF               *p_UCA1RXBUF
+
+/* USCI transmit buffer */
+#define p_UCA0TXBUF             ((UCAxTXBUF_t     *) 0x05CEu)
+#define UCA0TXBUF               *p_UCA0TXBUF
+#define p_UCA1TXBUF             ((UCAxTXBUF_t     *) 0x060Eu)
+#define UCA1TXBUF               *p_UCA1TXBUF
+
+#define p_UCA0ABCTL         ((UCAxABCTL_t         *) 0x05D0u)
+#define UCA0ABCTL           p_UCA0ABCTL->reg
+#define UCA0ABCTL_bits      p_UCA0ABCTL->bits
+
+#define p_UCA1ABCTL         ((UCAxABCTL_t         *) 0x0610u)
+#define UCA1ABCTL           p_UCA1ABCTL->reg
+#define UCA1ABCTL_bits      p_UCA1ABCTL->bits
+
+#define p_UCA0IRTCTL        ((UCAxIRTCTL_t         *) 0x05D2u)
+#define UCA0IRTCTL          p_UCA0IRTCTL->reg
+#define UCA0IRTCTL_bits     p_UCA0IRTCTL->bits
+
+#define p_UCA1IRTCTL        ((UCAxIRTCTL_t         *) 0x0612u)
+#define UCA1IRTCTL          p_UCA1IRTCTL->reg
+#define UCA1IRTCTL_bits     p_UCA1IRTCTL->bits
+
+#define p_UCA0IRRCTL        ((UCAxIRRCTL_t         *) 0x05D3u)
+#define UCA0IRRCTL          p_UCA0IRRCTL->reg
+#define UCA0IRRCTL_bits     p_UCA0IRRCTL->bits
+
+#define p_UCA1IRRCTL        ((UCAxIRRCTL_t         *) 0x0613u)
+#define UCA1IRRCTL          p_UCA1IRRCTL->reg
+#define UCA1IRRCTL_bits     p_UCA1IRRCTL->bits
+
+#define p_UCA0IE            ((UCAxIE_t         *) 0x05DCu)
+#define UCA0IE              p_UCA0IE->reg
+#define UCA0IE_bits         p_UCA0IE->bits
+
+#define p_UCA1IE            ((UCAxIE_t         *) 0x061Cu)
+#define UCA1IE              p_UCA1IE->reg
+#define UCA1IE_bits         p_UCA1IE->bits
+
+#define p_UCA0IFG           ((UCAxIFG_t         *) 0x05DDu)
+#define UCA0IFG             p_UCA0IFG->reg
+#define UCA0IFG_bits        p_UCA0IFG->bits
+
+#define p_UCA1IFG           ((UCAxIFG_t         *) 0x061Du)
+#define UCA1IFG             p_UCA1IFG->reg
+#define UCA1IFG_bits        p_UCA1IFG->bits
+
+/* USCI interrupt vector word */
+#define p_UCA0IV                ((UCAxIV_t     *) 0x05DEu)
+#define UCA0IV                  *p_UCA0IV
+#define p_UCA1IV                ((UCAxIV_t     *) 0x061Eu)
+#define UCA1IV                  *p_UCA1IV
+
+
+
+/*#########################################################################
+ *   USCI_B0 & USCI_B1  I2C and SPI Modes
+ *#########################################################################*/
+
+
+#define p_UCB0CTL1          ((UCBxCTL1_t         *) 0x05E0u)
+#define UCB0CTL1            p_UCB0CTL1->reg
+#define UCB0CTL1_bits       p_UCB0CTL1->bits
+
+#define p_UCB1CTL1          ((UCBxCTL1_t         *) 0x0620u)
+#define UCB1CTL1            p_UCB1CTL1->reg
+#define UCB1CTL1_bits       p_UCB1CTL1->bits
+
+
+#define p_UCB0CTL0          ((UCBxCTL0_t         *) 0x05E1u)
+#define UCB0CTL0            p_UCB0CTL0->reg
+#define UCB0CTL0_bits       p_UCB0CTL0->bits
+
+#define p_UCB1CTL0          ((UCBxCTL0_t         *) 0x0621u)
+#define UCB1CTL0            p_UCB1CTL0->reg
+#define UCB1CTL0_bits       p_UCB1CTL0->bits
+
+
+/* USCI synchronous bit rate 0  */
+#define p_UCB0BR0               ((UCBxBR0_t     *) 0x05E6u)
+#define UCB0BR0                 *p_UCB0BR0
+#define p_UCB1BR0               ((UCBxBR0_t     *) 0x0626u)
+#define UCB1BR0                 *p_UCB1BR0
+
+/* USCI synchronous bit rate 1  */
+#define p_UCB0BR1               ((UCBxBR1_t     *) 0x05E7u)
+#define UCB0BR1                 *p_UCB0BR1
+#define p_UCB1BR1               ((UCBxBR1_t     *) 0x0627u)
+#define UCB1BR1                 *p_UCB1BR1
+
+#define p_UCB0STAT          ((UCBxSTAT_t         *) 0x05EAu)
+#define UCB0STAT            p_UCB0STAT->reg
+#define UCB0STAT_bits       p_UCB0STAT->bits
+
+#define p_UCB1STAT          ((UCBxSTAT_t         *) 0x062Au)
+#define UCB1STAT            p_UCB1STAT->reg
+#define UCB1STAT_bits       p_UCB1STAT->bits
+
+/* USCI synchronous receive buffer */
+#define p_UCB0RXBUF             ((UCBxRXBUF_t     *) 0x05ECu)
+#define UCB0RXBUF               *p_UCB0RXBUF
+#define p_UCB1RXBUF             ((UCBxRXBUF_t     *) 0x062Cu)
+#define UCB1RXBUF               *p_UCB1RXBUF
+
+/* USCI synchronous transmit buffer */
+#define p_UCB0TXBUF             ((UCBxTXBUF_t     *) 0x05EEu)
+#define UCB0TXBUF               *p_UCB0TXBUF
+#define p_UCB1TXBUF             ((UCBxTXBUF_t     *) 0x062Eu)
+#define UCB1TXBUF               *p_UCB1TXBUF
+
+#define p_UCB0I2COA         ((UCBxI2COA_t         *) 0x05F0u)
+#define UCB0I2COA           p_UCB0I2COA->reg
+#define UCB0I2COA_bits      p_UCB0I2COA->bits
+
+#define p_UCB1I2COA         ((UCBxI2COA_t         *) 0x0630u)
+#define UCB1I2COA           p_UCB1I2COA->reg
+#define UCB1I2COA_bits      p_UCB1I2COA->bits
+
+#define p_UCB0I2CSA         ((UCBxI2CSA_t         *) 0x05F2u)
+#define UCB0I2CSA           p_UCB0I2CSA->reg
+#define UCB0I2CSA_bits      p_UCB0I2CSA->bits
+
+#define p_UCB1I2CSA         ((UCBxI2CSA_t         *) 0x0632u)
+#define UCB1I2CSA           p_UCB1I2CSA->reg
+#define UCB1I2CSA_bits      p_UCB1I2CSA->bits
+
+#define p_UCB0IE            ((UCBxIE_t         *) 0x05FCu)
+#define UCB0IE              p_UCB0IE->reg
+#define UCB0IE_bits         p_UCB0IE->bits
+
+#define p_UCB1IE            ((UCBxIE_t         *) 0x063Cu)
+#define UCB1IE              p_UCB1IE->reg
+#define UCB1IE_bits         p_UCB1IE->bits
+
+#define p_UCB0IFG           ((UCBxIFG_t         *) 0x05FDu)
+#define UCB0IFG             p_UCB0IFG->reg
+#define UCB0IFG_bits        p_UCB0IFG->bits
+
+#define p_UCB1IFG           ((UCBxIFG_t         *) 0x063Du)
+#define UCB1IFG             p_UCB1IFG->reg
+#define UCB1IFG_bits        p_UCB1IFG->bits
+
+/* USCI interrupt vector word */
+#define p_UCB0IV                ((UCBxIV_t     *) 0x05FEu)
+#define UCB0IV                  *p_UCB0IV
+#define p_UCB1IV                ((UCBxIV_t     *) 0x063Eu)
+#define UCB1IV                  *p_UCB1IV
+
+#define UCBxIV_NO_INTERRUPT      0x00  /* No interrupt pending */
+#define UCBxIV_SPI_UCRXIFG       0x02  /* SPI data received */
+#define UCBxIV_SPI_UCTXIFG       0x04  /* SPI transmit buffer empty */
+#define UCBxIV_I2C_ARBLOSS       0x02  /* I2C Arbitration Lost */
+#define UCBxIV_I2C_NACK          0x04  /* I2C not acknowledge */
+#define UCBxIV_I2C_START         0x06  /* I2C start condition received */
+#define UCBxIV_I2C_STOP          0x08  /* I2C stop condition received */
+#define UCBxIV_I2C_UCRXIFG       0x0A  /* I2C data received */
+#define UCBxIV_I2C_UCTXIFG       0x0C  /* I2C transmit buffer empty */
+
+
+
+/*#########################################################################
+ *   Watchdog Timer
+*##########################################################################*/
+
+
+#define p_WDTCTL                ((WDTCTL_t              *) 0x015Cu)
+#define WDTCTL                  *p_WDTCTL
+
+
+
