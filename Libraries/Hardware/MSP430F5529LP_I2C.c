@@ -31,9 +31,10 @@
  * Interface (UCB1) in the I2C Master mode for the Texas Instruments
  * MSP430F5529 Launchpad development board.
  *
- * Version 1.0
+ * Version 1.1
  *
  * Rev. 1.0, Initial Release
+ * Rev. 1.1, Updated static variable debugging info
  *
  *                                                                            */
 /* ===========================================================================*/
@@ -41,7 +42,7 @@
 #include "MSP430F5529LP.h"
 #include "MSP430F5529LP_CLOCK.h"
 #include "MSP430F5529LP_I2C.h"
-#include "MSP430F5529LP_TIMER_A2.h"
+#include "MSP430F5529LP_TIMERA2.h"
 
 
 /******************************************************************************
@@ -83,30 +84,28 @@
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 //                  ---- READ ME - DEBUGGING INFO ----
 //
-//  There is a bug in CCS ver 6, where static (file scope) variables can not
-//  be viewed in the debug watch window. It is bad programming style to make
-//  these variables permanently global, so here is a middle-of-the-road
-//  solution. If it is necesary to debug variables in this file, comment the
-//  line "#define STATIC static", and uncomment the line "#define STATIC".
-//  When you are done debugging, put it back the way it was.
-//  #define STATIC
+//  To view file scope static variables in the CCS debug watch window, the
+//  following syntax must be used. 'filename.c'::variableName
+//  The filename must be the full filename including the .c extension and
+//  must be surrounded by the single quotes, followed by a double-colon.
 //
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-#define STATIC static
 
+    static  volatile uint8_t     *pRxData;
+    static  volatile uint8_t     *pTxData;
 
-    STATIC  uint8_t     *pRxData;
-    STATIC  uint8_t     *pTxData;
+    static  volatile I2C_CmplCode_t  done;
 
-    STATIC  I2C_CmplCode_t  done;
+    static  volatile uint16_t    I2cStart;
 
-    STATIC  uint16_t    I2cStart;
-
-    STATIC  uint16_t    s_I2cErrorCnt;
-    STATIC  uint16_t    s_I2cErrNackCnt;
-    STATIC  uint16_t    s_I2cErrArbLossCnt;
-    STATIC  uint16_t    s_I2cErrUnhandledCnt;
+    static  volatile uint16_t    s_I2cErrorCnt;
+    static  volatile uint16_t    s_I2cErrNackCnt;
+    static  volatile uint16_t    s_I2cErrArbLossCnt;
+    static  volatile uint16_t    s_I2cErrUnhandledCnt;
   
+    static  volatile uint16_t   s_RxByteCounter;
+    static  volatile uint16_t   s_TxByteCounter;
+
    
 /******************************************************************************
    Subroutine:    function_name
@@ -189,7 +188,7 @@ void MSP430F5529LP_I2C_Initialize(void)
    Outputs:
 
 ******************************************************************************/
-void I2C_Read(uint8_t address, uint8_t *p_reg)
+void I2C_Read(uint8_t address, uint8_t *p_reg, uint16_t bytes)
 {
     while( (UCB1STAT_bits.UCBBUSY) &&
            (UCB1CTL1_bits.UCTXSTP) ) {};
@@ -201,7 +200,10 @@ void I2C_Read(uint8_t address, uint8_t *p_reg)
   
    UCB1I2CSA_bits.I2CSAx = address;
    pRxData = p_reg;
+   s_RxByteCounter = bytes;
    
+   if (2u > s_RxByteCounter) {s_RxByteCounter = 2u;}
+
    UCB1CTL1_bits.UCTR = 0u;         // set as receiver
    UCB1CTL1_bits.UCTXSTT = 1u;      // set start bit
    UCB1IE_bits.UCRXIE = 1u;         // enable Rx interrupt
@@ -228,13 +230,15 @@ void I2C_Read(uint8_t address, uint8_t *p_reg)
    Outputs:
 
 ******************************************************************************/
-void I2C_Write(uint8_t address, uint8_t * p_reg)
+void I2C_Write(uint8_t address, uint8_t * p_reg, uint16_t bytes)
 {
     // It is possible to complete the final ISR transaction, and queue up a new
     // i2c transaction while the last one is being completed. This is typically
     // due to the i2c module writing out the stop condition to the bus.
+    I2cStart = GetTick();
     while( (UCB1STAT_bits.UCBBUSY) &&
-           (UCB1CTL1_bits.UCTXSTP) ) {};
+           (UCB1CTL1_bits.UCTXSTP) &&
+           (35 > Elapse(I2cStart, GetTick())) ) {};
    
     // If our last transaction is complete, but the bus is still busy,
     // something is very wrong. Attempt to recover the bus before continuing.
@@ -245,6 +249,7 @@ void I2C_Write(uint8_t address, uint8_t * p_reg)
      
     UCB1I2CSA_bits.I2CSAx = address;
     pTxData = p_reg;
+    s_TxByteCounter = bytes;
 
     UCB1CTL1_bits.UCTR = 1u;        // set as transmitter
     UCB1CTL1_bits.UCTXSTT = 1u;     // set start bit
@@ -253,7 +258,7 @@ void I2C_Write(uint8_t address, uint8_t * p_reg)
     done = I2C_IN_PROGRESS;
     I2cStart = GetTick();
 
-    while ( (done == I2C_IN_PROGRESS) &&
+    while ( (I2C_IN_PROGRESS == done) &&
             (35 > Elapse(I2cStart, GetTick())) ) {}
 
     return;
@@ -270,6 +275,8 @@ void I2C_Write(uint8_t address, uint8_t * p_reg)
 static void I2C_Recovery(void)
 {
     uint8_t  RstCnt;
+
+    s_I2cErrorCnt++;
 
     __disable_interrupt();
 
@@ -361,14 +368,45 @@ static void I2cIsr1Rx(void)
 {  
     static uint8_t rxData;
 
-    UCB1CTL1_bits.UCTXSTP = 1u;      // set stop bit
-
     // Always pull the RX data and clear the interrupt flag
     UCB1IFG_bits.UCRXIFG = 0u;
     rxData = UCB1RXBUF;
 
-    *pRxData = rxData;
-    done = I2C_COMPLETED_SUCCESS;
+    // If the RxByteCounter is > 1...
+    if (1u < s_RxByteCounter)
+    {
+        s_RxByteCounter--;       /* Decrement RX byte counter */
+
+        // There are still bytes to receive after this one. Read the received
+        // byte into the buffer using the pRXData pointer.
+        // Increment the pointer to be ready for the next byte.
+        *pRxData++ = rxData;
+
+        // if after being decremented by 1 above, the value is now 1...
+        if( 1u == s_RxByteCounter )
+        {
+            // then there is only 1 byte left to be received.
+            // Set the request to generate a STOP bit.
+            UCB1CTL1_bits.UCTXSTP = 1u;
+        }
+    }
+    else if( 1u == s_RxByteCounter )
+    {
+        s_RxByteCounter--;       /* Decrement RX byte counter */
+
+        // This is the last byte to be received. Read the final byte into
+        // the buffer using the pRXData pointer. Set the status to SUCCESS
+        // and return the state machine to IDLE.
+        *pRxData = rxData;
+        done = I2C_COMPLETED_SUCCESS;
+     }
+     else // I2C_IN_PROGRESS != *B0TBlock.done
+     {
+         // The transaction has already completed or failed but this is
+         // not in and of itself an error, just a side-effect of timeout
+         // or arbitration loss errors
+         UCB1CTL1_bits.UCTXSTP = 1u;      // set stop bit
+     }
 }
 
 
@@ -380,21 +418,27 @@ static void I2cIsr1Rx(void)
 ******************************************************************************/
 static void I2cIsr1Tx(void)
 {  
-    // if the start bit is set, the slave has not yet acknowledged the
-    // address, and the I2C is waiting for data to be written to UCB1TXBUF.
-    if (1u == UCB1CTL1_bits.UCTXSTT)
-    {
-        UCB1TXBUF = *pTxData;
-    }
-    // else, we have transmitted the data from the Tx buffer and the I2CB0 Tx
-    // buffer is now empty (hence the Isr call). Disable the Tx interrupt, and
-    // set the request to send a STOP bit.
-    else
-    {
-        UCB1CTL1_bits.UCTXSTP = 1u;
-        UCB1IE_bits.UCTXIE = 0u;
-        done = I2C_COMPLETED_SUCCESS;
-    }
+
+    // If the s_TXByteCounter > 0...
+     if (s_TxByteCounter)
+     {
+        // Write the next value to the I2C transmit buffer. Decrement
+        // the s_TXByteCounter.
+        UCB1TXBUF = *pTxData++;
+        s_TxByteCounter--;
+     }
+
+     // If the s_TXByteCounter == 0...
+     else
+     {
+        // Then we have transmitted the last of the data from the Tx buffer
+        // and the I2C Tx buffer is empty (hence the Isr call). Clear the
+        // Tx interrupt flag, and set the request to send a STOP bit.
+        // Set the status to SUCCESS and return the state machine to IDLE.
+         UCB1CTL1_bits.UCTXSTP = 1u;
+         UCB1IE_bits.UCTXIE = 0u;
+         done = I2C_COMPLETED_SUCCESS;
+     }
 }
 
 

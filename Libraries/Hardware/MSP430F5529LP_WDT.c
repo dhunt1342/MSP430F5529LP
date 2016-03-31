@@ -30,9 +30,10 @@
  * This file provides functions for the Watchdog module in the
  * Texas Instruments MSP430F5529 Launchpad development board.
  *
- * Version 1.0
+ * Version 1.1
  *
  * Rev. 1.0, Initial Release
+ * Rev. 1.1, Updated static variable debugging info
  *
  *                                                                            */
 /* ===========================================================================*/
@@ -74,19 +75,14 @@
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 //                  ---- READ ME - DEBUGGING INFO ----
 //
-//  There is a bug in CCS ver 6, where static (file scope) variables can not
-//  be viewed in the debug watch window. It is bad programming style to make
-//  these variables permanently global, so here is a middle-of-the-road
-//  solution. If it is necesary to debug variables in this file, comment the
-//  line "#define STATIC static", and uncomment the line "#define STATIC".
-//  When you are done debugging, put it back the way it was.
-//  #define STATIC
+//  To view file scope static variables in the CCS debug watch window, the
+//  following syntax must be used. 'filename.c'::variableName
+//  The filename must be the full filename including the .c extension and
+//  must be surrounded by the single quotes, followed by a double-colon.
 //
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-#define STATIC static
 
-
-     STATIC WDT_Callback_t  WDT_timers[MAX_WDT_TIMERS];
+     static volatile WDT_Callback_t  WDT_timers[MAX_WDT_TIMERS];
 
 
 /******************************************************************************

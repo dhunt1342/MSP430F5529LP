@@ -121,8 +121,8 @@ void MSP430F5529LP_CLOCK_Initialize(void)
 
     // For debugging purposes, the next two lines can be uncommented to output
     // SMCLK on Pin 2.2. Note: This pin is not used by the Grove system.
-    P2DIR_bits.P2DIR2 = 1;
-    P2SEL_bits.P2SEL2 = 1;
+    //P2DIR_bits.P2DIR2 = 1;
+    //P2SEL_bits.P2SEL2 = 1;
 
     // on the MSP430F5529LP the XT1 and XT2 inputs are shared with gpio and are
     // disabled at power-on until the port functions are selected.

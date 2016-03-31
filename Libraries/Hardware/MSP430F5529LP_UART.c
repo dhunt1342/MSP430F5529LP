@@ -31,9 +31,10 @@
  * Interface (USCI) in the UART mode for the Texas Instruments MSP430F5529
  * Launchpad development board.
  *
- * Version 1.0
+ * Version 1.1
  *
  * Rev. 1.0, Initial Release
+ * Rev. 1.1, Updated static variable debugging info
  *
  *                                                                            */
 /* ===========================================================================*/
@@ -72,25 +73,20 @@
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 //                  ---- READ ME - DEBUGGING INFO ----
 //
-//  There is a bug in CCS ver 6, where static (file scope) variables can not
-//  be viewed in the debug watch window. It is bad programming style to make
-//  these variables permanently global, so here is a middle-of-the-road
-//  solution. If it is necesary to debug variables in this file, comment the
-//  line "#define STATIC static", and uncomment the line "#define STATIC".
-//  When you are done debugging, put it back the way it was.
-//  #define STATIC
+//  To view file scope static variables in the CCS debug watch window, the
+//  following syntax must be used. 'filename.c'::variableName
+//  The filename must be the full filename including the .c extension and
+//  must be surrounded by the single quotes, followed by a double-colon.
 //
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-#define STATIC static
 
+    static volatile uint8_t    s_UartRxMsgBuffer_u8[MAX_UART_BUFFER_LEN];
+    static volatile uint16_t   s_UartRxWriteIndex_u16;
+    static volatile uint16_t   s_UartRxReadIndex_u16;
 
-    STATIC uint8_t    s_UartRxMsgBuffer_u8[MAX_UART_BUFFER_LEN];
-    STATIC uint16_t   s_UartRxWriteIndex_u16;
-    STATIC uint16_t   s_UartRxReadIndex_u16;
-
-    STATIC uint8_t    s_UartTxMsgBuffer_u8[MAX_UART_BUFFER_LEN];
-    STATIC uint16_t   s_UartTxWriteIndex_u16;
-    STATIC uint16_t   s_UartTxReadIndex_u16;
+    static volatile uint8_t    s_UartTxMsgBuffer_u8[MAX_UART_BUFFER_LEN];
+    static volatile uint16_t   s_UartTxWriteIndex_u16;
+    static volatile uint16_t   s_UartTxReadIndex_u16;
 
 
 /******************************************************************************
@@ -102,6 +98,7 @@
 ******************************************************************************/
 void MSP430F5529LP_UART_Initialize(void)
 {
+    int x;
 
     UCA0CTL1_bits.UCSWRST = 1u;     // disable the UART
 
@@ -136,13 +133,15 @@ void MSP430F5529LP_UART_Initialize(void)
    UCA0BR1 = 0x00u;
    UCA0BR0 = 0x1Au;
 
-   memset(s_UartRxMsgBuffer_u8, 0,
-           sizeof(s_UartRxMsgBuffer_u8[0] * MAX_UART_BUFFER_LEN));
+   for (x=0; x<MAX_UART_BUFFER_LEN; x++)
+   {
+       s_UartRxMsgBuffer_u8[x] = 0u;
+       s_UartTxMsgBuffer_u8[x] = 0u;
+   }
+
    s_UartRxWriteIndex_u16 = 0u;
    s_UartRxReadIndex_u16 = 0u;
 
-   memset(s_UartTxMsgBuffer_u8, 0,
-           sizeof(s_UartTxMsgBuffer_u8[0] * MAX_UART_BUFFER_LEN));
    s_UartTxWriteIndex_u16 = 0u;
    s_UartTxReadIndex_u16 = 0u;
 
@@ -231,6 +230,10 @@ void PutTxByte(uint8_t byte)
 void SendSerialMsg(char* pMsg, int size)
 {
     int x;
+
+    // if there is currently a message in the UART Tx Message Buffer that is
+    // being processed, wait for that to complete first.
+    while (s_UartTxWriteIndex_u16 != s_UartTxReadIndex_u16) {}
 
     for (x=0; x<size; x++)
     {

@@ -25,11 +25,9 @@
 
 /* ===========================================================================*/
 /*
- * FileName:      MSP430F5529LP_I2C.h
+ * FileName:      MSP430F5529LP_BUTTONS.h
  *
- * This file provides functions for the Universal Serial Communications
- * Interface (UCB1) in the I2C Master mode for the Texas Instruments
- * MSP430F5529 Launchpad development board.
+ * Description
  *
  * Version 1.0
  *
@@ -38,49 +36,44 @@
  *                                                                            */
 /* ===========================================================================*/
 
-#ifndef __MSP430F5529LP_I2C_H__
-#define __MSP430F5529LP_I2C_H__
-
+#ifndef __MSP430F5529LP_BUTTONS_H__
+#define __MSP430F5529LP_BUTTONS_H__
 
 
 /******************************************************************************
     PUBLIC DEFINITIONS
 ******************************************************************************/
-   
-   typedef enum I2C_CompletionCode
-   {
-	   I2C_IN_PROGRESS = 0,       // also corresponds to !done
-	   I2C_COMPLETED_SUCCESS,     // Completed_Success,
-	   I2C_ARBITRATION_LOST,
-	   I2C_NACK_RESPONSE
-   } I2C_CmplCode_t;
-   
-   
-   
-   
+
+    typedef void (*BUTTON_Callback_t) (void);
+
+    typedef struct
+    {
+        uint16_t    single_press    :1;
+        uint16_t    double_click    :1;
+        uint16_t    long_press      :1;
+    }ButtonEvents_t;
+
+
 /******************************************************************************
     PUBLIC FUNCTION PROTOTYPES
 ******************************************************************************/
 
-   void MSP430F5529LP_I2C_Initialize(void);
+    extern void MSP430F5529LP_BUTTONS_Initialize(void);
 
-   void I2C_Read(uint8_t    address,
-                 uint8_t    *p_reg,
-                 uint16_t   bytes);
-   
-   void I2C_Write(uint8_t   address,
-                  uint8_t   *p_reg,
-                  uint16_t  bytes);
-   
-   
+    extern void Set_BUTTON_Callback(void *callback);
+
+
 /******************************************************************************
     PUBLIC VARIABLES (extern)
 ******************************************************************************/
 
-   
+    extern volatile ButtonEvents_t   Button1Events;
+    extern volatile ButtonEvents_t   Button2Events;
+
+
 /******************************************************************************
-	End MSP430F5529LP_I2C.h
+    End MSP430F5529LP_BUTTONS.h
 ******************************************************************************/
 
-#endif   // __MSP430F5529LP_I2C_H__
+#endif   // __MSP430F5529LP_BUTTONS_H__
 

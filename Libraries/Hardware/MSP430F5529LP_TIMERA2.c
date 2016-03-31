@@ -30,9 +30,10 @@
  * This file provides functions for the Timer A2 module in the
  * Texas Instruments MSP430F5529 Launchpad development board.
  *
- * Version 1.0
+ * Version 1.1
  *
  * Rev. 1.0, Initial Release
+ * Rev. 1.1, Updated static variable debugging info
  *
  *                                                                            */
 /* ===========================================================================*/
@@ -54,6 +55,10 @@
     PRIVATE DEFINITIONS (static const)
 ******************************************************************************/
 
+    typedef void (*TIMERA2_Button_Service) (void);
+
+    TIMERA2_Button_Service     Button_Service = NULL;
+
 
 /******************************************************************************
     PRIVATE FUNCTION PROTOTYPES (static)
@@ -67,20 +72,15 @@
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 //                  ---- READ ME - DEBUGGING INFO ----
 //
-//  There is a bug in CCS ver 6, where static (file scope) variables can not
-//  be viewed in the debug watch window. It is bad programming style to make
-//  these variables permanently global, so here is a middle-of-the-road
-//  solution. If it is necesary to debug variables in this file, comment the
-//  line "#define STATIC static", and uncomment the line "#define STATIC".
-//  When you are done debugging, put it back the way it was.
-//  #define STATIC
+//  To view file scope static variables in the CCS debug watch window, the
+//  following syntax must be used. 'filename.c'::variableName
+//  The filename must be the full filename including the .c extension and
+//  must be surrounded by the single quotes, followed by a double-colon.
 //
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-#define STATIC static
 
-
-    STATIC  uint16_t    s_CurrentTick;
-    STATIC  uint32_t    s_CurrentTick32;
+    static  volatile uint16_t    s_CurrentTick;
+    static  volatile uint32_t    s_CurrentTick32;
 
 
 /******************************************************************************
@@ -102,7 +102,6 @@ void MSP430F5529LP_TIMERA2_Initialize(void)
     
     s_CurrentTick = 0;
     s_CurrentTick32 = 0; 
-
 }
 
 
@@ -118,6 +117,14 @@ void __attribute__((__interrupt__(TIMER2_A0_VECTOR))) TIMER2_A0_ISR(void)
 {
     s_CurrentTick++;
     s_CurrentTick32++;
+
+    if (NULL != Button_Service)
+    {
+        if (0 == (s_CurrentTick % 16))
+        {
+            Button_Service();
+        }
+    }
 }
 
 
@@ -205,6 +212,7 @@ uint32_t GetTick32(void)
    static uint32_t retVal;
    
    __disable_interrupt();
+   asm("NOP");  // one NOP required to ensure interrupts are truly disabled.
   
    retVal = s_CurrentTick32;
    
@@ -228,6 +236,26 @@ uint32_t GetTick32(void)
 uint32_t Elapse32(uint32_t start, uint32_t stop)
 {
     return stop - start;
+}
+
+
+/******************************************************************************
+    Subroutine:     Set_Button_Service
+    Description:    Use this function to create a watchdog timer, and register
+                    the callback function to be executed when it expires.
+    Inputs:         Index: The index of the WDT_timers[] array to place the
+                    new WDT timer being registered. Valid values are from
+                    zero to MAX_WDT_TIMERS-1.
+                    timeout: The timeout value of the new timer in seconds.
+                    For example, a value of 10, will expire after 10 seconds.
+                    callback: The name of the function that will be called
+                    when the registered timer expires.
+    Outputs:        None
+
+******************************************************************************/
+void Set_Button_Service(void *callback)
+{
+    Button_Service = (TIMERA2_Button_Service) callback;
 }
 
 
