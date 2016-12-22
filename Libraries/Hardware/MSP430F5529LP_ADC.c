@@ -109,7 +109,7 @@ void MSP430F5529LP_ADC_Initialize(void)
     ADC12CTL1_bits.ADC12SHSx = 0u;       // Use internal ADC12 start conv bit
     ADC12CTL1_bits.ADC12SHP = 1u;        // Pulse mode using internal sampling timer
     ADC12CTL1_bits.ADC12ISSH = 0u;       // No signal inversion
-    ADC12CTL1_bits.ADC12DIVx = 0u;       // Clock divide by 1
+    ADC12CTL1_bits.ADC12DIVx = 4u;       // Clock divide by 5 = 4.8MHz
     ADC12CTL1_bits.ADC12SSELx = 3u;      // Clock source = SMCLK
     ADC12CTL1_bits.ADC12CONSEQx = 1u;    // Mode = sequence of channels
 
@@ -247,7 +247,7 @@ void ADC_SetChannel(uint8_t mem, uint8_t channel, uint8_t eos)
             ADC12IFG_bits.ADC12IFG15 = 0u;
             break;
         default:
-            // Do nothing. If the channel passed into the funtion was not valid
+            // Do nothing. If the channel passed into the function was not valid
             // no action will be taken, no error will be returned.
             break;
     }

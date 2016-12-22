@@ -34,6 +34,7 @@
  *
  * Rev. 1.0, Initial Release
  * Rev. 1.1, Updated static variable debugging info
+ * Rev. 1.2, Moved WDT_Callback_t structure out of .h into .c
  *
  *                                                                            */
 /* ===========================================================================*/
@@ -57,10 +58,16 @@
 ******************************************************************************/
 
     // This defines the number of WDT timer callback functions that can be
-    // registered at the same time. This value can be increased to accomodate
+    // registered at the same time. This value can be increased to accommodate
     // more timers as needed.
 
     #define MAX_WDT_TIMERS  3
+
+    typedef struct
+    {
+        uint16_t        timeout;
+        WDT_Callback    callback;
+    } WDT_Callback_t;
 
 
 /******************************************************************************
@@ -108,6 +115,32 @@ void MSP430F5529LP_WDT_Initialize(void)
 
 
 /******************************************************************************
+    Subroutine:     Set_WDT_Timer
+    Description:    Use this function to create a watchdog timer, and register
+                    the callback function to be executed when it expires.
+    Inputs:         Index: The index of the WDT_timers[] array to place the
+                    new WDT timer being registered. Valid values are from
+                    zero to MAX_WDT_TIMERS-1.
+                    timeout: The timeout value of the new timer in seconds.
+                    For example, a value of 10, will expire after 10 seconds.
+                    callback: The name of the function that will be called
+                    when the registered timer expires.
+    Outputs:        None
+
+******************************************************************************/
+void Set_WDT_Timer(uint16_t index, uint16_t timeout_in_sec, WDT_Callback callback)
+{
+    // If the index provided exceeds the size of WDT_timers, just exit.
+    if (MAX_WDT_TIMERS <= index)    {return;}
+
+    // Otherwise, register the new timer at the index position provided.
+    WDT_timers[index].timeout = timeout_in_sec;
+    WDT_timers[index].callback = callback;
+
+}
+
+
+/******************************************************************************
     Subroutine:     WDT_ISR
     Description:    Interrupt service routine for the watchdog interval timer.
                     If there are active WDT timers registered, the values will
@@ -139,32 +172,6 @@ void __attribute__((__interrupt__(WDT_VECTOR))) WDT_ISR(void)
             }
         }
     }
-}
-
-
-/******************************************************************************
-    Subroutine:     Set_WDT_Timer
-    Description:    Use this function to create a watchdog timer, and register
-                    the callback function to be executed when it expires.
-    Inputs:         Index: The index of the WDT_timers[] array to place the
-                    new WDT timer being registered. Valid values are from
-                    zero to MAX_WDT_TIMERS-1.
-                    timeout: The timeout value of the new timer in seconds.
-                    For example, a value of 10, will expire after 10 seconds.
-                    callback: The name of the function that will be called
-                    when the registered timer expires.
-    Outputs:        None
-
-******************************************************************************/
-void Set_WDT_Timer(uint16_t index, uint16_t timeout, WDT_Callback callback)
-{
-    // If the index provided exceeds the size of WDT_timers, just exit.
-    if (MAX_WDT_TIMERS <= index)    {return;}
-
-    // Otherwise, register the new timer at the index position provided.
-    WDT_timers[index].timeout = timeout;
-    WDT_timers[index].callback = callback;
-
 }
 
 

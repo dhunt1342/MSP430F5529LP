@@ -41,11 +41,14 @@
  * Version 1.0
  *
  * Rev. 1.0, Initial Release
+ * Rev. 1.1, Minor editorial updates and cleanup
  *
  *                                                                            */
 /* ===========================================================================*/
 
 #include "MSP430F5529LP.h"
+#include "MSP430F5529LP_CLOCK.h"
+#include "MSP430F5529LP_WDT.h"
 
 
 /******************************************************************************
@@ -56,16 +59,6 @@
 /******************************************************************************
    PUBLIC VARIABLES
 ******************************************************************************/
-
-    // These flags are set by the callback functions to indicate to the main
-    // loop that it is time to perform an action. Although this example is very
-    // small, and it would be possible to have the interrupt perform these
-    // actions, it is good to get used to not performing too many tasks
-    // within the interrupts. This makes it easier when the designs start
-    // becoming very heavily interrupt driven.
-
-    uint16_t    LED1_toggle_flag;
-    uint16_t    LED2_toggle_flag;
 
 
 /******************************************************************************
@@ -79,15 +72,27 @@
 
     static void initialize(void);
 
-    void LED1_timeout(void);
+    static void LED1_timeout(void);
 
-    void LED2_timeout(void);
+    static void LED2_timeout(void);
 
 
 /******************************************************************************
    PRIVATE VARIABLES (static)
 ******************************************************************************/
 
+    /* These flags are set by the callback functions to indicate to the main
+     * loop that it is time to perform an action. Although this example is very
+     * small, and it would be possible to have the interrupt perform these
+     * actions, it is good to get used to not performing too many tasks
+     * within the interrupts. This makes it easier when the designs start
+     * becoming very heavily interrupt driven. It is also very easy to forget
+     * that interrupts are disabled inside the callback functions, and things
+     * like timeouts or delays will not function.
+     */
+
+    static uint16_t    LED1_toggle_flag;
+    static uint16_t    LED2_toggle_flag;
 
 
 /******************************************************************************
@@ -130,12 +135,11 @@ int main( void )
     Outputs:        None
 
 ******************************************************************************/
-void initialize(void)
+static void initialize(void)
 {
     // ###################################################################
-    // This section initializes the operating environment
+    // Add operating environment initialization here
 
-    WDTCTL = WDTPW + WDTHOLD;   // Stop the watchdog timer
     MSP430F5529LP_CLOCK_Initialize();
     MSP430F5529LP_WDT_Initialize();
 
@@ -157,6 +161,10 @@ void initialize(void)
     Set_WDT_Timer(0, 1, LED1_timeout);
     Set_WDT_Timer(1, 1, LED2_timeout);
 
+
+    // ###################################################################
+    // Last step before exiting, enable global interrupts
+
     __enable_interrupt();
 }
 
@@ -168,10 +176,11 @@ void initialize(void)
     Outputs:        None
 
 ******************************************************************************/
-void LED1_timeout(void)
+static void LED1_timeout(void)
 {
     // Set the toggle flag. This lets the main loop know that it is time to
     // toggle the LED. Re-register the LED1 timer for another 1 second.
+
     LED1_toggle_flag = 1u;
     Set_WDT_Timer(0, 1, LED1_timeout);
 }
@@ -184,10 +193,11 @@ void LED1_timeout(void)
     Outputs:        None
 
 ******************************************************************************/
-void LED2_timeout(void)
+static void LED2_timeout(void)
 {
     // Set the toggle flag. This lets the main loop know that it is time to
     // toggle the LED. Re-register the LED2 timer for another 1 second.
+
     LED2_toggle_flag = 1u;
     Set_WDT_Timer(1, 1, LED2_timeout);
 }

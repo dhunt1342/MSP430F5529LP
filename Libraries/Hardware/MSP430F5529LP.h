@@ -33,6 +33,8 @@
  * Version 1.0
  *
  * Rev. 1.0, Initial Release
+ * Rev. 1.1, Updates to the PMM Power Management System definitions to provide
+ * additional byte level and bit-select access.
  *
  *                                                                            */
 /* ===========================================================================*/
@@ -2701,26 +2703,64 @@ typedef volatile union
 *##########################################################################*/
 
 
-typedef volatile uint16_t PMMCTL0_t;
-#define p_PMMCTL0                ((PMMCTL0_t              *) 0x0120u)
-#define PMMCTL0                  *p_PMMCTL0
+typedef volatile union
+{
+    uint16_t reg;   /* PMM control register 0 */
+    struct
+    {
+        uint8_t reg_L;
+        uint8_t reg_H;
+    } bytes;
+    struct
+    {
+        uint16_t PMMCOREVx        : 2; /* Core Voltage */
+        uint16_t PMMSWBOR         : 1; /* Trigger software brownout reset */
+        uint16_t PMMSWPOR         : 1; /* Trigger software power-on reset */
+        uint16_t PMMREGOFF        : 1; /* Regulator off */
+    } bits;
+} PMMCTL0_t;
 
-#define PMMPW               (0xA500u)  /* PMM Register Write Password */
+#define p_PMMCTL0               ((PMMCTL0_t              *) 0x0120u)
+#define PMMCTL0                 p_PMMCTL0->reg
+#define PMMCTL0_L               p_PMMCTL0->bytes.reg_L
+#define PMMCTL0_H               p_PMMCTL0->bytes.reg_H
+#define PMMCTL0_bits            p_PMMCTL0->bits
 
-#define PMMCOREV_0          (0x0000u)  /* PMM Core Voltage 0 (1.35V) */
-#define PMMCOREV_1          (0x0001u)  /* PMM Core Voltage 1 (1.55V) */
-#define PMMCOREV_2          (0x0002u)  /* PMM Core Voltage 2 (1.75V) */
-#define PMMCOREV_3          (0x0003u)  /* PMM Core Voltage 3 (1.85V) */
+
+#define PMMPW               (0xA500u)  /* PMM Register Write Password - word */
+#define PMMPW_word          (0xA500u)  /* PMM Register Write Password - word */
+#define PMMPW_byte          (0xA5u)    /* PMM Register Write Password - byte */
+
+#define PMMCOREV_0          (0x0000u)  /* PMM Core Voltage 0 (1.44V) */
+#define PMMCOREV_1          (0x0001u)  /* PMM Core Voltage 1 (1.64V) */
+#define PMMCOREV_2          (0x0002u)  /* PMM Core Voltage 2 (1.84V) */
+#define PMMCOREV_3          (0x0003u)  /* PMM Core Voltage 3 (1.94V) */
 
 
-typedef volatile uint16_t PMMCTL1_t;
-#define p_PMMCTL1                ((PMMCTL1_t              *) 0x0122u)
-#define PMMCTL1                  *p_PMMCTL1
+typedef volatile union
+{
+    uint16_t reg;   /* PMM control register 1 */
+    struct
+    {
+        uint8_t reg_L;
+        uint8_t reg_H;
+    } bytes;
+} PMMCTL1_t;
+
+#define p_PMMCTL1               ((PMMCTL1_t              *) 0x0122u)
+#define PMMCTL1                 p_PMMCTL1->reg
+#define PMMCTL1_L               p_PMMCTL1->bytes.reg_L
+#define PMMCTL1_H               p_PMMCTL1->bytes.reg_H
 
 
 typedef volatile union
 {
     uint16_t reg;   /* SVS and SVM high side control register */
+    struct
+    {
+        uint8_t reg_L;
+        uint8_t reg_H;
+    } bytes;
     struct
     {
         uint16_t SVSMHRRLx        : 3; /* SVS and SVM high side Reset Release Voltage Level Bits */
@@ -2741,12 +2781,19 @@ typedef volatile union
 
 #define p_SVSMHCTL              ((SVSMHCTL_t            *) 0x0124u)
 #define SVSMHCTL                p_SVSMHCTL->reg
+#define SVSMHCTL_L              p_SVSMHCTL->bytes.reg_L
+#define SVSMHCTL_H              p_SVSMHCTL->bytes.reg_H
 #define SVSMHCTL_bits           p_SVSMHCTL->bits
 
 
 typedef volatile union
 {
     uint16_t reg;   /* SVS and SVM low side control register */
+    struct
+    {
+        uint8_t reg_L;
+        uint8_t reg_H;
+    } bytes;
     struct
     {
         uint16_t SVSMLRRLx        : 3; /* SVS and SVM low side Reset Release Voltage Level Bits */
@@ -2767,12 +2814,19 @@ typedef volatile union
 
 #define p_SVSMLCTL              ((SVSMLCTL_t            *) 0x0126u)
 #define SVSMLCTL                p_SVSMLCTL->reg
+#define SVSMLCTL_L              p_SVSMLCTL->bytes.reg_L
+#define SVSMLCTL_H              p_SVSMLCTL->bytes.reg_H
 #define SVSMLCTL_bits           p_SVSMLCTL->bits
 
 
 typedef volatile union
 {
     uint16_t reg;   /* SVSIN and SVSOUT control register */
+    struct
+    {
+        uint8_t reg_L;
+        uint8_t reg_H;
+    } bytes;
     struct
     {
         uint16_t                  : 3;
@@ -2787,12 +2841,19 @@ typedef volatile union
 
 #define p_SVSMIO                ((SVSMIO_t              *) 0x0128u)
 #define SVSMIO                  p_SVSMIO->reg
+#define SVSMIO_L                p_SVSMIO->bytes.reg_L
+#define SVSMIO_H                p_SVSMIO->bytes.reg_H
 #define SVSMIO_bits             p_SVSMIO->bits
 
 
 typedef volatile union
 {
     uint16_t reg;   /* PMM Interrupt Flag */
+    struct
+    {
+        uint8_t reg_L;
+        uint8_t reg_H;
+    } bytes;
     struct
     {
         uint16_t SVSMLDLYIFG      : 1; /* SVS and SVM low side Delay expired interrupt flag */
@@ -2816,12 +2877,19 @@ typedef volatile union
 
 #define p_PMMIFG                ((PMMIFG_t              *) 0x012Cu)
 #define PMMIFG                  p_PMMIFG->reg
+#define PMMIFG_L                p_PMMIFG->bytes.reg_L
+#define PMMIFG_H                p_PMMIFG->bytes.reg_H
 #define PMMIFG_bits             p_PMMIFG->bits
 
 
 typedef volatile union
 {
     uint16_t reg;   /* PMM and RESET Interrupt Enable */
+    struct
+    {
+        uint8_t reg_L;
+        uint8_t reg_H;
+    } bytes;
     struct
     {
         uint16_t SVSMLDLYIE       : 1; /* SVS and SVM low side Delay expired interrupt enable */
@@ -2842,6 +2910,8 @@ typedef volatile union
 
 #define p_PMMRIE                ((PMMRIE_t              *) 0x012Eu)
 #define PMMRIE                  p_PMMRIE->reg
+#define PMMRIE_L                p_PMMRIE->bytes.reg_L
+#define PMMRIE_H                p_PMMRIE->bytes.reg_H
 #define PMMRIE_bits             p_PMMRIE->bits
 
 

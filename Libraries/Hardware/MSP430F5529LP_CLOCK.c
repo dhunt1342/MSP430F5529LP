@@ -1,7 +1,7 @@
 
 /* ########################################################################## */
 /*
- * This file was created by www.DavesMotleyProjects.com
+ * This file was created for www.DavesMotleyProjects.com
  *
  * This software is provided under the following conditions:
  * Permission is hereby granted, free of charge, to any person obtaining
@@ -33,6 +33,8 @@
  * Version 1.0
  *
  * Rev. 1.0, Initial Release
+ * Rev. 2.0, Modified code to increase core voltage by single steps as
+ *           recommended by the TI family user's guide.
  *
  *                                                                            */
 /* ===========================================================================*/
@@ -59,6 +61,8 @@
     PRIVATE FUNCTION PROTOTYPES (static)
 ******************************************************************************/
 
+    static void Set_Core_Voltage(uint16_t level);
+
 
 /******************************************************************************
     PRIVATE VARIABLES (static)
@@ -75,57 +79,58 @@
 ******************************************************************************/
 void MSP430F5529LP_CLOCK_Initialize(void)
 {
+    /**************************************************************************
+     *  IMPORTANT:
+     * The Watchdog timer on the MSP430 is enabled by default after reset in
+     * watchdog mode with an initial ~32 ms timeout. The user must halt or
+     * reconfigure the watchdog before it expires or the processor will reset.
+     * Since this CLOCK initialization must be called for every project that
+     * uses the Operating Environment, disabling the watchdog is being placed
+     * here. Note that if excessive memory initialization is performed by the
+     * standard library start-up (which occurs before execution of the main()
+     * function), then watchdog disable will have to be done as part of C
+     * library start-up. This code will come too late to prevent continuous
+     * re-booting in that case. The need to modify library startup is unusual,
+     * except for very large projects. This should be sufficient.
+     *
+     **************************************************************************/
+    WDTCTL = WDTPW + WDTHOLD;           // Stop the watchdog timer
+
+
     //##########################################################################
-    /*-------------------------------------------------------------------------
-    *   UCS  Unified System Clock - Defaults
-    *-------------------------------------------------------------------------*/
-    /*
-    UCSCTL0_bits.DCOx = 0;
-    UCSCTL0_bits.MODx = 0;
-    UCSCTL1_bits.DCORSELx = 2;
-    UCSCTL1_bits.DISMOD = 0;
-    UCSCTL2_bits.FLLDx = 1;
-    UCSCTL2_bits.FLLNx = 1;
-    UCSCTL3_bits.FLLREFDIVx = 0;
-    UCSCTL3_bits.SELREFx = 0;
-    UCSCTL4_bits.SELAx = 0;
-    UCSCTL4_bits.SELMx = 4;
-    UCSCTL4_bits.SELSx = 4;
-    UCSCTL5_bits.DIVAx = 0;
-    UCSCTL5_bits.DIVMx = 0;
-    UCSCTL5_bits.DIVPAx = 0;
-    UCSCTL5_bits.DIVSx = 0;
-    UCSCTL6_bits.XT2DRIVEx = 3;
-    UCSCTL6_bits.XT2BYPASS = 0;
-    UCSCTL6_bits.XT2OFF = 1;
-    UCSCTL6_bits.XT1DRIVEx = 3;
-    UCSCTL6_bits.XTS = 0;
-    UCSCTL6_bits.XT1BYPASS = 0;
-    UCSCTL6_bits.XCAPx = 3;
-    UCSCTL6_bits.SMCLKOFF = 0;
-    UCSCTL6_bits.XT1OFF = 1;
-    UCSCTL7_bits.XT2OFFG = 0;
-    UCSCTL7_bits.XT1HFOFFG = 0;
-    UCSCTL7_bits.XT1LFOFFG = 1;
-    UCSCTL7_bits.DCOFFG = 1;
-    UCSCTL8_bits.MODOSCREQEN = 0;
-    UCSCTL8_bits.SMCLKREQEN = 1;
-    UCSCTL8_bits.MCLKREQEN = 1;
-    UCSCTL8_bits.ACLKREQEN = 1;
-    */
+    /* Set VCORE for High Frequency operation
+     * By default the MSP430 is configured for Low Power operation and the max
+     * clock frequency is limited to less than 8 MHz. It is much more likely
+     * for maker projects that a High Frequency clock, such as 24 MHz would be
+     * desired. To support this the core voltage must be increased before
+     * selecting a higher clock frequency, otherwise the results will be
+     * unpredictable. Additionally, TI indicates that it is critical that the
+     * core voltage only be increased one level at a time. These next commands
+     * execute an algorithm to increase the core voltage and supply supervisors
+     * and monitors to the required level, one step at a time.
+     *
+     **************************************************************************/
+    Set_Core_Voltage(1);    // Max Freq. 12 MHz
+    Set_Core_Voltage(2);    // Max Freq. 20 MHx
+    Set_Core_Voltage(3);    // Max Freq. 25 MHz (now we're ready!)
+
+
     //##########################################################################
+    /* Configure the Unified Clock System
+     **************************************************************************/
 
-
-    // Set VCORE for HF operation (word access only)
-    PMMCTL0 = PMMPW + PMMCOREV_3;    // PMM Core Voltage 3 (1.85V)
-
-    // For debugging purposes, the next two lines can be uncommented to output
-    // SMCLK on Pin 2.2. Note: This pin is not used by the Grove system.
-    //P2DIR_bits.P2DIR2 = 1;
-    //P2SEL_bits.P2SEL2 = 1;
+    /***************************************************************************
+     *  For debugging purposes, SMCLK can be output on Pin 2.2. If this is
+     * desired, it is recommended to place the following in the application
+     * code:
+     *      P2DIR_bits.P2DIR2 = 1;
+     *      P2SEL_bits.P2SEL2 = 1;
+     * Modifying the library for this purpose is not recommended.
+     **************************************************************************/
 
     // on the MSP430F5529LP the XT1 and XT2 inputs are shared with gpio and are
-    // disabled at power-on until the port functions are selected.
+    // disabled at power-on until the port functions are selected. These pins
+    // must be enabled to operate the 32.768 KHz crystal
     P5SEL_bits.P5SEL4 = 1;         // Enable XT1 Pin 5.4
     P5SEL_bits.P5SEL5 = 1;         // Enable XT1 Pin 5.5
     P5SEL_bits.P5SEL2 = 1;         // Enable XT2 Pin 5.2
@@ -175,7 +180,7 @@ void MSP430F5529LP_CLOCK_Initialize(void)
         // Clear UCS individual oscillator fault flags
         UCSCTL7 &= ~(XT2OFFG + XT1HFOFFG + XT1LFOFFG + DCOFFG);
         SFRIFG1_bits.OFIFG = 0u;            // Clear Osc. fault flag
-    }while (1u == SFRIFG1_bits.OFIFG);      // Test oscillator fault flag
+    } while (1u == SFRIFG1_bits.OFIFG);     // Test oscillator fault flag
 
     UCSCTL6_bits.XT2DRIVEx = 3;		// Decrease XT2 Drive for 4MHz
 
@@ -184,7 +189,104 @@ void MSP430F5529LP_CLOCK_Initialize(void)
     UCSCTL4_bits.SELMx = 4;          // MCLK source = DCOCLKDIV (24MHz)
 
     return;
+}
+
+
+/******************************************************************************
+    Subroutine:     Set_Core_Voltage
+    Description:    This function runs through the sequence for incrementing
+                    the core voltage to the next level.
+    Inputs:         uint16_t level - Defines the VCORE level to set next. It is
+                    up to the user to make sure the the levels are sequential.
+    Outputs:        None
+
+******************************************************************************/
+static void Set_Core_Voltage(uint16_t level)
+{
+    // NOTE: Writing the byte access password unlocks all PMM registers
+    PMMCTL0_H = PMMPW_byte;            // unlock PMM registers
+
+    /* Set the SVS high-side reset voltage level. If DVCC falls short of the
+     * SVSH voltage level selected by SVSHRVL, a reset is triggered (if
+     * SVSHPE = 1 (default)). The voltage levels are defined in the
+     * device-specific data sheet.
+     * Setting         Min     Typ     Max
+     * SVSHRVL = 0     1.57    1.68    1.78 (default)
+     * SVSHRVL = 1     1.79    1.88    1.98
+     * SVSHRVL = 2     1.98    2.08    2.21
+     * SVSHRVL = 3     2.10    2.18    2.31
+     */
+    SVSMHCTL_bits.SVSHRVLx = level;
+
+    /* Set the SVS and SVM high-side reset release voltage level. These bits
+     * define the reset release voltage level of the SVSH. It is also used for
+     * the SVMH to define the voltage reached level. The voltage levels are
+     * defined in the device-specific data sheet.
+     * Setting         Min     Typ     Max
+     * SVSMHRRL = 0    1.62    1.74    1.85 (default)
+     * SVSMHRRL = 1    1.88    1.94    2.07
+     * SVSMHRRL = 2    2.07    2.14    2.28
+     * SVSMHRRL = 3    2.20    2.30    2.42
+     * SVSMHRRL = 4    2.32    2.40    2.55
+     * SVSMHRRL = 5    2.52    2.70    2.88
+     * SVSMHRRL = 6    2.90    3.10    3.23
+     * SVSMHRRL = 7    2.90    3.10    3.23
+     */
+    SVSMHCTL_bits.SVSMHRRLx = level;
+
+    /* Set the SVS and SVM low-side reset release voltage level. These bits
+     * define the reset release voltage level of the SVSL. It is also used
+     * for the SVML to define the voltage reached level.
+     * Setting         DVCC Setting
+     * SVSMLRRL = 0    > 1.8V
+     * SVSMLRRL = 1    > 2.0V
+     * SVSMLRRL = 2    > 2.2V
+     * SVSMLRRL = 3    > 2.4V
+     */
+    SVSMLCTL_bits.SVSMLRRLx = level;
+
+    /* Wait until the SVM is settled. This bit is the SVS and SVM low-side
+     * delay expired interrupt flag. This interrupt flag is set if the delay
+     * element expired. The bit is cleared by software or by reading the
+     * interrupt vector word.
+     */
+    while (0u == PMMIFG_bits.SVSMHDLYIFG);
+    while (0u == PMMIFG_bits.SVSMLDLYIFG);
+
+    // Clear any pre-existing interrupt flags
+    PMMIFG_bits.SVMLVLRIFG = 0u;   // SVM low-side voltage level reached IFG
+    PMMIFG_bits.SVMLIFG = 0u;      // SVM low-side IFG.
+
+    // Set the new Core Voltage level
+    PMMCTL0_bits.PMMCOREVx = level;
+
+    /* If the core voltage is below the SVM level reached voltage, wait here
+     * until VCORE reaches the new voltage level.
+     */
+    if (1u == PMMIFG_bits.SVMLIFG)
+    {
+        while (0u == PMMIFG_bits.SVMLVLRIFG);
     }
+
+    /* Set the SVS low-side reset voltage level. If VCORE falls short of the
+     * SVSL voltage level selected by SVSLRVL, a reset is triggered (if
+     * SVSLPE = 1).
+     */
+    SVSMLCTL_bits.SVSLRVLx = level;
+
+    /* Wait until the SVS is settled. This bit is the SVS and SVM low-side
+     * delay expired interrupt flag. This interrupt flag is set if the delay
+     * element expired. The bit is cleared by software or by reading the
+     * interrupt vector word.
+     */
+    while (0u == PMMIFG_bits.SVSMLDLYIFG);
+
+    // lock all of PMM registers
+    PMMCTL0_H = !PMMPW_byte;
+
+    return;
+}
+
 
 /******************************************************************************
 	End of File: MSP430F5529LP_CLOCK.c

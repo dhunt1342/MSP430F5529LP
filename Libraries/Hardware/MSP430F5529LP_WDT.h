@@ -33,6 +33,7 @@
  * Version 1.0
  *
  * Rev. 1.0, Initial Release
+ * Rev. 1.1, Moved WDT_Callback_t structure out of .h into .c
  *
  *                                                                            */
 /* ===========================================================================*/
@@ -47,12 +48,6 @@
 
     typedef void (*WDT_Callback) (void);
 
-    typedef struct
-    {
-        uint16_t        timeout;
-        WDT_Callback    callback;
-    } WDT_Callback_t;
-
 
 /******************************************************************************
     PUBLIC FUNCTION PROTOTYPES
@@ -60,7 +55,9 @@
 
    void MSP430F5529LP_WDT_Initialize(void);
    
-   void Set_WDT_Timer(uint16_t index, uint16_t timeout, WDT_Callback callback);
+   void Set_WDT_Timer(uint16_t index,
+                      uint16_t timeout_in_sec,
+                      WDT_Callback callback);
 
 
 /******************************************************************************

@@ -94,10 +94,10 @@ void MSP430F5529LP_TIMERA2_Initialize(void)
 {
     // Setup Timer A2
     TA2CCTL0_bits.CCIE = 1;         // CCR0 interrupt enabled
-    TA2CTL_bits.TACLR = 1;          // Clear
+    TA2CTL_bits.TACLR = 1;          // clear
     TA2CTL_bits.MCx = 1;            // upmode
     TA2CTL_bits.TASSELx = 2;        // SMCLK
-    TA2CTL_bits.IDx = 0;            // divide by 0
+    TA2CTL_bits.IDx = 0;            // divided by 1
     TA2CCR0 = 24000;                // 1ms
     
     s_CurrentTick = 0;
