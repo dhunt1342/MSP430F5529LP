@@ -33,6 +33,8 @@
  * Version 1.0
  *
  * Rev. 1.0, Initial Release
+ * Rev. 1.1, minor editorial updates.
+ * Rev. 2.0, Added the Expired and Expired32 functions.
  *
  *                                                                            */
 /* ===========================================================================*/
@@ -55,16 +57,26 @@
    void MSP430F5529LP_TIMERA2_Initialize(void);
 
    void delay(uint16_t ms);
-   
-   uint32_t millis(void);
 
    uint16_t GetTick(void);
 
-   uint16_t Elapse(uint16_t start, uint16_t stop);
+   uint16_t Elapse(uint16_t start,
+                   uint16_t stop);
+
+   uint16_t Expired(uint16_t duration,
+                    uint16_t start,
+                    uint16_t stop);
+
+   uint32_t millis(void);
 
    uint32_t GetTick32(void);
 
-   uint32_t Elapse32(uint32_t start, uint32_t stop);
+   uint32_t Elapse32(uint32_t start,
+                     uint32_t stop);
+
+   uint32_t Expired32(uint32_t duration,
+                      uint32_t start,
+                      uint32_t stop);
 
 
 /******************************************************************************

@@ -27,12 +27,22 @@
 /*
  * This program blinks the LEDs on the Texas Instruments MSP430F5529 Launchpad
  * development board using the arduino style blocking delay function provided
- * in the TIMER_A2 peripheral files. This demonstrates how to use basic "delay"
- * functionality to perform tasks.
+ * in the TIMERA2 peripheral files.
+ *
+ * This example code demonstrates how to use basic "delay" functionality to
+ * perform tasks. These can make it extremely simple to write a small program.
+ * However, this example code also spends all of its time doing nothing but
+ * performing this task, which is a significant waste of the processor's
+ * capability.
+ *
+ * An alternative method would be to use non-blocking delays, and allow the
+ * main loop to perform other tasks until the delay expires. This will be
+ * explained in a separate non-blocking delay example.
  *
  * Version 1.0
  *
  * Rev. 1.0, Initial Release
+ * Rev. 1.1, Minor editorial updates and cleanup
  *
  *                                                                            */
 /* ===========================================================================*/
@@ -64,10 +74,6 @@
 
     static void initialize(void);
 
-    void LED1_timeout(void);
-
-    void LED2_timeout(void);
-
 
 /******************************************************************************
    PRIVATE VARIABLES (static)
@@ -86,14 +92,6 @@ int main( void )
 {
     // perform initialization
     initialize();
-
-    // This example shows that using the arduino style blocking delay functions
-    // that it is extremely simple to write a small program. However, this
-    // program also spends all of its time doing nothing but performing this
-    // task, which is a significant waste of the processor's capability. A
-    // better method would be to use non-blocking delays, and allow the main
-    // loop to perform other tasks until the delay expires. This will be
-    // explained in a separate example.
 
     for (;;)    // Loop forever...
     {
@@ -119,9 +117,8 @@ int main( void )
 void initialize(void)
 {
     // ###################################################################
-    // This section initializes the operating environment
+    // Add operating environment initialization here
 
-    WDTCTL = WDTPW + WDTHOLD;   // Stop the watchdog timer
     MSP430F5529LP_CLOCK_Initialize();
     MSP430F5529LP_TIMERA2_Initialize();
 
@@ -136,10 +133,14 @@ void initialize(void)
     P4OUT_bits.P4OUT7 = 1;         // Set P4.7 initial value
 
 
-    // Even though the main code does not use interrupts in this example, it
-    // is necessary to enable interrupts so that the rest of the operating
-    // environment operates correctly.
+    // ###################################################################
+    // Last step before exiting, enable global interrupts
+
     __enable_interrupt();
+
+    // IMPORTANT: Even though the main code does not use interrupts in this
+    // example, it is necessary to enable interrupts so that the rest of the
+    // operating environment operates correctly.
 }
 
 

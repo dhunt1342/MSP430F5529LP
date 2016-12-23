@@ -25,7 +25,10 @@
 
 /* ===========================================================================*/
 /*
- * <write a basic description of the program here>
+ * This program blinks the LEDs on the Texas Instruments MSP430F5529 Launchpad
+ * development board using a non-blocking delay function using the GetTick and
+ * Elapse functions in the TIMER_A2 peripheral files. This demonstrates how to
+ * use a more versatile delay function than the basic "delay".
  *
  * Version 1.0
  *
@@ -55,9 +58,7 @@
 
 typedef enum {
     LED_STATE_1,
-    LED_STATE_2,
-    LED_STATE_3,
-    LED_STATE_4
+    LED_STATE_2
 } LED_States_t;
 
 
@@ -73,7 +74,8 @@ typedef enum {
    PRIVATE VARIABLES (static)
 ******************************************************************************/
 
-    LED_States_t LED_State;
+    static LED_States_t LED_State;
+    static uint16_t start;
 
 
 /******************************************************************************
@@ -85,13 +87,8 @@ typedef enum {
 ******************************************************************************/
 int main( void )
 {
-    uint16_t    start;
-
     // perform initialization
     initialize();
-
-    LED_State = LED_STATE_1;
-    start = GetTick();
 
     for (;;)    // Loop forever...
     {
@@ -99,53 +96,35 @@ int main( void )
         {
             case (LED_STATE_1):
             {
-                if (50 <= Elapse(start, GetTick()))
+                if (Expired(500, start, GetTick()))
                 {
-                    P1OUT_bits.P1OUT0 ^= 1;     // Toggle P1.0 (LED1)
-                    start = GetTick();
-                    LED_State = LED_STATE_2;
+                    P1OUT_bits.P1OUT0 ^= 1;     // toggle P1.0 (LED1)
+                    start = GetTick();          // collect new start time
+                    LED_State = LED_STATE_2;    // advance to state 2
                 }
             }
             break;
 
             case (LED_STATE_2):
             {
-                if (500 <= Elapse(start, GetTick()))
+                if (Expired(500, start, GetTick()))
                 {
-                    P1OUT_bits.P1OUT0 ^= 1;     // Toggle P1.0 (LED1)
-                    P4OUT_bits.P4OUT7 ^= 1;     // Toggle P4.7 (LED2)
-                    start = GetTick();
-                    LED_State = LED_STATE_3;
+                    P1OUT_bits.P1OUT0 ^= 1;     // toggle P1.0 (LED1)
+                    P4OUT_bits.P4OUT7 ^= 1;     // toggle P4.7 (LED2)
+                    start = GetTick();          // collect new start time
+                    LED_State = LED_STATE_1;    // advance to state 1
                 }
             }
             break;
 
-            case (LED_STATE_3):
+            default:
             {
-                if (50 <= Elapse(start, GetTick()))
-                {
-                    P4OUT_bits.P4OUT7 ^= 1;     // Toggle P4.7 (LED2)
-                    start = GetTick();
-                    LED_State = LED_STATE_4;
-                }
+                start = GetTick();          // collect new start time
+                LED_State = LED_STATE_1;    // advance to state 1
             }
-            break;
 
-            case (LED_STATE_4):
-            {
-                if (500 <= Elapse(start, GetTick()))
-                {
-                    P1OUT_bits.P1OUT0 ^= 1;     // Toggle P1.0 (LED1)
-                    P4OUT_bits.P4OUT7 ^= 1;     // Toggle P4.7 (LED2)
-                    start = GetTick();
-                    LED_State = LED_STATE_1;
-                }
-            }
-            break;
-
-        }
-
-    }
+        }   // end switch (LED_State)
+    }   // end for (;;)
 
     return 0;
 }
@@ -162,9 +141,8 @@ int main( void )
 void initialize(void)
 {
     // ###################################################################
-    // This section initializes the operating environment
+    // Add operating environment initialization here
 
-    WDTCTL = WDTPW + WDTHOLD;   // Stop the watchdog timer
     MSP430F5529LP_CLOCK_Initialize();
     MSP430F5529LP_TIMERA2_Initialize();
 
@@ -179,9 +157,13 @@ void initialize(void)
     P4OUT_bits.P4OUT7 = 1;         // Set P4.7 initial value
 
 
-    // Even though the main code does not use interrupts in this example, it
-    // is necessary to enable interrupts so that the rest of the operating
-    // environment operates correctly.
+    LED_State = LED_STATE_1;    // Initialize the main loop state machine
+    start = GetTick();          // Collect the inital start time
+
+
+    // ###################################################################
+    // Last step before exiting, enable global interrupts
+
     __enable_interrupt();
 }
 
