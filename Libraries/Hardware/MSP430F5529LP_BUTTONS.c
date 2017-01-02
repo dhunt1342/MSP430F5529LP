@@ -37,8 +37,9 @@
 /* ===========================================================================*/
 
 #include "MSP430F5529LP.h"
-#include "MSP430F5529LP_BUTTONS.h"
 #include "MSP430F5529LP_TIMERA2.h"
+#include "MSP430F5529LP_GPIO.h"
+#include "MSP430F5529LP_BUTTONS.h"
 
 
 /******************************************************************************
@@ -57,6 +58,15 @@
     PRIVATE DEFINITIONS (static const)
 ******************************************************************************/
 
+    /*  This defines the maximum number of buttons (or signals) that can be
+     * registered at the same time. This value can be increased to accommodate
+     * more buttons as needed, however this will affect the amount of
+     * processing that occurs within the interrupt context of the TIMERA2
+     * ISR at the button service interval.
+     */
+    #define MAX_BUTTONS  10
+
+
     typedef enum
     {
         UP1_ENTRY,
@@ -67,24 +77,36 @@
         UP2_MAIN,
         DN2_ENTRY,
         DN2_MAIN
-    } Button_State_t;
+    } ButtonState_t;
 
-    #define BUTTON1     P2IN_bits.P2IN1
-    #define BUTTON2     P1IN_bits.P1IN1
-
-    #define BUTTON_DBNC_THRESHOLD       4       // 64 ms
-    #define BUTTON_DBL_CLICK_TIMEOUT    250     // 250 ms
-    #define BUTTON_LNG_PRESS_TIMEOUT    1000    // 1000 ms
+    typedef struct
+    {
+        uint16_t            pin;
+        pinLevel_enum       polarity;
+        ButtonCallback_t    callback;
+        ButtonState_t       state;
+        ButtonEvents_t      status;
+        uint16_t            start;
+        uint16_t            debounce;
+        uint16_t            longpressed;
+    } Button_Callback_t;
 
 
 /******************************************************************************
     PRIVATE FUNCTION PROTOTYPES (static)
 ******************************************************************************/
 
-    static void Button_Service(void);
+    void Button_Service_Callback(void);
 
-    static void Button1_Service(void);
+    static void Button_State_Machine(uint16_t x);
 
+
+    // This function prototype is needed to expose a function in the TIMERA2
+    // library that is only called by the BUTTON library. This prototype is
+    // not in the TIMERA2 header file.
+
+    extern void Set_Button_Service(uint16_t intvl_ms,
+                                   TIMERA2_ButtonService_t callback);
 
 
 /******************************************************************************
@@ -101,236 +123,395 @@
 //
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-    static Button_State_t   s_Button1State;
-    static uint16_t         s_Button1Start;
-    static uint16_t         s_Button1Dbnc;
-    static uint16_t         s_Button1LongPressed;
+    static volatile Button_Callback_t  Buttons[MAX_BUTTONS];
 
-    static BUTTON_Callback_t    Button_Callback;
-
-
-/******************************************************************************
-    Subroutine:     function_name
-    Description:   
-    Inputs:
-    Outputs:
-
-******************************************************************************/
-void MSP430F5529LP_BUTTONS_Initialize(void)
-{
-    P2DIR_bits.P2DIR1 = 0u;
-    P2REN_bits.P2REN1 = 1u;
-    P2OUT_bits.P2OUT1 = 1u;
-
-    P1DIR_bits.P1DIR1 = 0u;
-    P1REN_bits.P1REN1 = 1u;
-    P1OUT_bits.P1OUT1 = 1u;
-
-    extern void Set_Button_Service(void *callback);
-    Set_Button_Service(Button_Service);
-
-    MSP430F5529LP_TIMERA2_Initialize();
-}
+    static uint16_t s_ButtonSrvcInterval_ms;
+    static uint16_t s_ButtonDbncThresh_cnt;
+    static uint16_t s_ButtonDblClickTimeout_ms;
+    static uint16_t s_ButtonLngPressTimeout_ms;
 
 
 /******************************************************************************
-    Subroutine:     Set_Button_Service
-    Description:    Use this function to create a watchdog timer, and register
-                    the callback function to be executed when it expires.
-    Inputs:         Index: The index of the WDT_timers[] array to place the
-                    new WDT timer being registered. Valid values are from
-                    zero to MAX_WDT_TIMERS-1.
-                    timeout: The timeout value of the new timer in seconds.
-                    For example, a value of 10, will expire after 10 seconds.
-                    callback: The name of the function that will be called
-                    when the registered timer expires.
+    Subroutine:     MSP430F5529LP_BUTTONS_Initialize
+    Description:    This function initializes the button service framework
+    Inputs:         uint16_t  ButtonSrvcInterval_ms: This value defines how
+                    often the TIMERA2 library will call the
+                    Button_Service_Callback.
+                    uint16_t  ButtonDbncThresh_cnt: This value defines how many
+                    times the button service must see a valid new button state
+                    before considering it "debounced". The debounce time equals
+                    the srvc interval x dbnc count (i.e. 8 ms x 3 = 24 ms)
+                    uint16_t  ButtonDblClickTimeout_ms: This value defines the
+                    time that a press/unpress event must occur within to be
+                    considered as a double-click event.
+                    uint16_t  ButtonLngPressTimeout_ms: This value defines how
+                    long a button press must be held to be considered a
+                    long-press event.
     Outputs:        None
 
 ******************************************************************************/
-void Set_BUTTON_Callback(void *callback)
+void MSP430F5529LP_BUTTONS_Initialize(uint16_t  ButtonSrvcInterval_ms,
+                                      uint16_t  ButtonDbncThresh_cnt,
+                                      uint16_t  ButtonDblClickTimeout_ms,
+                                      uint16_t  ButtonLngPressTimeout_ms)
 {
-    Button_Callback = (BUTTON_Callback_t) callback;
-}
+    uint16_t    x;
+
+    /* There are two buttons provided on the MSP430F5529LP launchpad boards:
+     * BUTTON1 is connected to Pin P2.1
+     * BUTTON2 is connected to Pin P1.1
+     * Both of these buttons are shorted to ground when the button is pressed.
+     * In order to make the circuit work, an internal pull-up resistor is
+     * enabled. This makes the polarity 1=not pushed, 0=pushed.
+     *
+     */
+    P2DIR_bits.P2DIR1 = 0u;     // set BUTTON1 pin as input (DIR=0)
+    P2REN_bits.P2REN1 = 1u;     // enable the pin's resistor
+    P2OUT_bits.P2OUT1 = 1u;     // set resistor to PULL-UP
+
+    P1DIR_bits.P1DIR1 = 0u;     // set BUTTON2 pin as input (DIR=0)
+    P1REN_bits.P1REN1 = 1u;     // enable the pin's resistor
+    P1OUT_bits.P1OUT1 = 1u;     // set the resistor to PULL-UP
 
 
-/******************************************************************************
-    Subroutine:     function_name
-    Description:
-    Inputs:
-    Outputs:
-
-******************************************************************************/
-static void Button_Service(void)
-{
-    Button1_Service();
-}
-
-/******************************************************************************
-    Subroutine:     function_name
-    Description:
-    Inputs:
-    Outputs:
-
-******************************************************************************/
-static void Button1_Service(void)
-{
-    switch(s_Button1State)
+    // Loop through and initialize all of the buttons...
+    for (x=0u; x<MAX_BUTTONS; x++)
     {
+        // And make sure all of the callback values are NULL (disabled)
+        Buttons[x].callback = (ButtonCallback_t)NULL;
+    }
+
+
+    // set the variable values that define the button service behavior.
+    s_ButtonSrvcInterval_ms = ButtonSrvcInterval_ms;
+    s_ButtonDbncThresh_cnt = ButtonDbncThresh_cnt;
+    s_ButtonDblClickTimeout_ms = ButtonDblClickTimeout_ms;
+    s_ButtonLngPressTimeout_ms = ButtonLngPressTimeout_ms;
+
+
+    // Configure and start the button service in the TIMERA2 library.
+    Set_Button_Service(s_ButtonSrvcInterval_ms,
+                       Button_Service_Callback);
+}
+
+
+/******************************************************************************
+    Subroutine:     Set_Button_Callback
+    Description:    Use this function to register a pin (connected to a button
+                    or signal) to be serviced by the button service library.
+    Inputs:         uint16_t index: The index of the Buttons[] array to place
+                    the new pin (button) being registered. Valid values are from
+                    zero to MAX_BUTTONS-1. However, index values need to be
+                    sequential, without gaps, as the service will stop
+                    processing the array at the first unregistered index.
+                    uint16_t pin: The arduino-style definition of a pin based
+                    on it's pin number in the package (see GPIO library).
+                    uint16_t polarity: This value defines the "asserted" state
+                    of the pin being registered. For example, for a pin that is
+                    connected to a pull-up (1), that gets shorted to gnd (0)
+                    when a button is pressed, 0 would be the asserted state.
+                    ButtonCallback_t callback: The name of the function to be
+                    called when the button service detects a button event.
+    Outputs:        None
+
+******************************************************************************/
+void Set_Button_Callback(uint16_t index,
+                         uint16_t pin,
+                         uint16_t polarity,
+                         ButtonCallback_t callback)
+{
+    // perform basic integrity checks. Take no action for invalid requests.
+    if (MAX_BUTTONS <= index) {return;}
+    if (0u == pinValid(pin)) {return;}
+    if (NULL == callback) {return;}
+    if ((0u != polarity) && (1u != polarity)) {return;}
+
+    Buttons[index].pin = pin;
+    Buttons[index].polarity = polarity;
+    Buttons[index].callback = callback;
+}
+
+
+/******************************************************************************
+    Subroutine:     Get_Button_Status
+    Description:    Use this function to read the button events of the
+                    button at the index provided.
+    Inputs:         uint16_t index: The index of the Buttons[] array from which
+                    the button events are to be read.
+    Outputs:        ButtonEvents_t: The return value which provides the
+                    button events. See .h file for structure definition.
+
+******************************************************************************/
+ButtonEvents_t Get_Button_Status(uint16_t index)
+{
+    static ButtonEvents_t retval;
+
+    // perform basic integrity checks.
+    // If the index is invalid, return an invalid response.
+    if (MAX_BUTTONS <= index)
+    {
+        retval.reg = 0xFF;
+    }
+    else
+    {
+        retval = Buttons[index].status;
+    }
+
+    return retval;
+}
+
+
+
+/******************************************************************************
+    Subroutine:     Clear_Button_Status
+    Description:    Use this function to clear the button events of the
+                    button at the index provided.
+    Inputs:         uint16_t index: The index of the Buttons[] array for which
+                    the button events are to be cleared.
+    Outputs:        None
+
+******************************************************************************/
+void Clear_Button_Status(uint16_t index)
+{
+    // perform basic integrity checks. Take no action for invalid requests.
+    if (MAX_BUTTONS <= index) {return;}
+
+    Buttons[index].status.reg = 0u;
+}
+
+
+/******************************************************************************
+    Subroutine:     Button_Service_Callback
+    Description:    After the BUTTON library has been initialized by calling
+                    MSP430F5529LP_BUTTONS_Initialize(), and after global
+                    interrupts have been enabled, this function is called
+                    repeatedly by the TIMERA2 library module at an interval
+                    defined by s_ButtonSrvcInterval_ms.
+    Inputs:         None
+    Outputs:        None
+
+    NOTE: This function is called within the context of an ISR.
+
+******************************************************************************/
+void Button_Service_Callback(void)
+{
+    uint16_t    x;
+
+    // Loop through all of the Buttons
+    for (x=0u; x<MAX_BUTTONS; x++)
+    {
+        // If the current index is registered (not NULL)...
+        if (NULL != Buttons[x].callback)
+        {
+            // Run the button state machine for this button
+            Button_State_Machine(x);
+        }
+        // If the current index is NULL...
+        else
+        {
+            // Stop processing the array.
+            break;
+        }
+    }
+}
+
+/******************************************************************************
+    Subroutine:     Button_State_Machine
+    Description:    This function is called for each registered button, and
+                    pushes the buttons through the state machine based on the
+                    variables within the Button_Callback_t structure. This
+                    makes the state machine operation for each button
+                    independent.
+    Inputs:         uint16_t x: The index of the Buttons[] array for which the
+                    state machine is being called.
+    Outputs:        None
+
+    NOTE: This function is called within the context of an ISR.
+
+******************************************************************************/
+static void Button_State_Machine(uint16_t x)
+{
+    switch(Buttons[x].state)
+    {
+
+        //#####################################################################
+        //  STATE: UP1
+        //#####################################################################
+
         case(UP1_ENTRY):
         {
-            s_Button1Dbnc = 0;
-            s_Button1State = UP1_MAIN;
+            Buttons[x].debounce = 0;
+            Buttons[x].state = UP1_MAIN;
         }
         break;
 
         case(UP1_MAIN):
         {
             // If the button is pressed...
-            if (0 == BUTTON1)
+            if (Buttons[x].polarity == pinInput(Buttons[x].pin))
             {
-                s_Button1Dbnc += 1u;    // accumulate debounce samples
+                Buttons[x].debounce += 1u;    // accumulate debounce samples
             }
             // If the button is unpressed...
             else
             {
-                s_Button1Dbnc = 0u;     // reset the debounce value
+                Buttons[x].debounce = 0u;     // reset the debounce value
             }
 
             // if there are N consecutive measurements...
-            if (BUTTON_DBNC_THRESHOLD <= s_Button1Dbnc)
+            if (s_ButtonDbncThresh_cnt <= Buttons[x].debounce)
             {
-                s_Button1State = DN1_ENTRY;
+                Buttons[x].state = DN1_ENTRY;
             }
         }
         break;
 
+
+        //#####################################################################
+        //  STATE: DN1
+        //#####################################################################
+
         case(DN1_ENTRY):
         {
-            s_Button1Start = GetTick();
-            s_Button1Dbnc = 0u;
-            s_Button1LongPressed = 0u;
-            s_Button1State = DN1_MAIN;
+            Buttons[x].start = GetTick();
+            Buttons[x].debounce = 0u;
+            Buttons[x].longpressed = 0u;
+            Buttons[x].state = DN1_MAIN;
         }
         break;
 
         case(DN1_MAIN):
         {
-            if (!s_Button1LongPressed)
+            if (!Buttons[x].longpressed)
             {
-                if (BUTTON_LNG_PRESS_TIMEOUT <= Elapse(s_Button1Start, GetTick()))
+                if (Expired(s_ButtonLngPressTimeout_ms, Buttons[x].start, GetTick()))
                 {
-                    s_Button1LongPressed = 1u;
-                    Button1Events.long_press = 1u;
-                    if (NULL != Button_Callback) {Button_Callback();}
+                    Buttons[x].longpressed = 1u;
+                    Buttons[x].status.long_press = 1u;
+                    if (NULL != Buttons[x].callback) {Buttons[x].callback();}
                 }
             }
 
             // If the button is unpressed...
-            if (1 == BUTTON1)
+            if (Buttons[x].polarity != pinInput(Buttons[x].pin))
             {
-                s_Button1Dbnc += 1u;    // accumulate debounce samples
+                Buttons[x].debounce += 1u;    // accumulate debounce samples
             }
             // If the button is pressed...
             else
             {
-                s_Button1Dbnc = 0u;     // reset the debounce value
+                Buttons[x].debounce = 0u;     // reset the debounce value
             }
 
             // if there are N consecutive measurements...
-            if (BUTTON_DBNC_THRESHOLD <= s_Button1Dbnc)
+            if (s_ButtonDbncThresh_cnt <= Buttons[x].debounce)
             {
-                if (!s_Button1LongPressed)
+                if (!Buttons[x].longpressed)
                 {
-                    if (BUTTON_DBL_CLICK_TIMEOUT <= Elapse(s_Button1Start, GetTick()))
+                    if (Expired(s_ButtonDblClickTimeout_ms, Buttons[x].start, GetTick()))
                     {
-                        Button1Events.single_press = 1u;
-                        if (NULL != Button_Callback) {Button_Callback();}
-                        s_Button1State = UP1_ENTRY;
+                        Buttons[x].status.single_press = 1u;
+                        if (NULL != Buttons[x].callback) {Buttons[x].callback();}
+                        Buttons[x].state = UP1_ENTRY;
                     }
                     else
                     {
-                        s_Button1State = UP2_ENTRY;
+                        Buttons[x].state = UP2_ENTRY;
                     }
                 }
                 else
                 {
-                    s_Button1State = UP1_ENTRY;
+                    Buttons[x].state = UP1_ENTRY;
                 }
             }
         }
         break;
 
+
+        //#####################################################################
+        //  STATE: UP2
+        //#####################################################################
+
         case(UP2_ENTRY):
         {
-            s_Button1Start = GetTick();
-            s_Button1Dbnc = 0u;
-            s_Button1State = UP2_MAIN;
+            Buttons[x].start = GetTick();
+            Buttons[x].debounce = 0u;
+            Buttons[x].state = UP2_MAIN;
         }
         break;
 
         case(UP2_MAIN):
         {
-            if (BUTTON_DBL_CLICK_TIMEOUT <= Elapse(s_Button1Start, GetTick()))
+            if (Expired(s_ButtonDblClickTimeout_ms, Buttons[x].start, GetTick()))
             {
-                Button1Events.single_press = 1u;
-                if (NULL != Button_Callback) {Button_Callback();}
-                s_Button1State = UP1_ENTRY;
+                Buttons[x].status.single_press = 1u;
+                if (NULL != Buttons[x].callback) {Buttons[x].callback();}
+                Buttons[x].state = UP1_ENTRY;
             }
 
             // If the button is pressed...
-            if (0 == BUTTON1)
+            if (Buttons[x].polarity == pinInput(Buttons[x].pin))
             {
-                s_Button1Dbnc += 1u;    // accumulate debounce samples
+                Buttons[x].debounce += 1u;    // accumulate debounce samples
             }
             // If the button is unpressed...
             else
             {
-                s_Button1Dbnc = 0u;     // reset the debounce value
+                Buttons[x].debounce = 0u;     // reset the debounce value
             }
 
             // if there are N consecutive measurements...
-            if (BUTTON_DBNC_THRESHOLD <= s_Button1Dbnc)
+            if (s_ButtonDbncThresh_cnt <= Buttons[x].debounce)
             {
-                s_Button1State = DN2_ENTRY;
+                Buttons[x].state = DN2_ENTRY;
             }
         }
         break;
 
 
+        //#####################################################################
+        //  STATE: DN2
+        //#####################################################################
+
         case(DN2_ENTRY):
         {
-            s_Button1Start = GetTick();
-            s_Button1Dbnc = 0u;
-            s_Button1State = DN2_MAIN;
+            Buttons[x].start = GetTick();
+            Buttons[x].debounce = 0u;
+            Buttons[x].state = DN2_MAIN;
         }
         break;
 
         case(DN2_MAIN):
         {
             // If the button is unpressed...
-            if (1 == BUTTON1)
+            if (Buttons[x].polarity != pinInput(Buttons[x].pin))
             {
-                s_Button1Dbnc += 1u;    // accumulate debounce samples
+                Buttons[x].debounce += 1u;    // accumulate debounce samples
             }
             // If the button is unpressed...
             else
             {
-                s_Button1Dbnc = 0u;     // reset the debounce value
+                Buttons[x].debounce = 0u;     // reset the debounce value
             }
 
             // if there are N consecutive measurements...
-            if (BUTTON_DBNC_THRESHOLD <= s_Button1Dbnc)
+            if (s_ButtonDbncThresh_cnt <= Buttons[x].debounce)
             {
-                Button1Events.double_click = 1u;
-                if (NULL != Button_Callback) {Button_Callback();}
-                s_Button1State = UP1_ENTRY;
+                Buttons[x].status.double_click = 1u;
+                if (NULL != Buttons[x].callback) {Buttons[x].callback();}
+                Buttons[x].state = UP1_ENTRY;
             }
         }
         break;
 
+
+        //#####################################################################
+        //  DEFAULT
+        //#####################################################################
+
         default:
         {
-            s_Button1State = UP1_ENTRY;
+            Buttons[x].state = UP1_ENTRY;
         }
         break;
     }

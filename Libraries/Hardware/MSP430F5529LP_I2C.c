@@ -66,7 +66,7 @@
    PRIVATE FUNCTION PROTOTYPES (static)
 ******************************************************************************/
 
-    static void I2C_Recovery(void);
+    static void I2cRecovery(void);
 
     static void I2cIsr1Rx(void);
    
@@ -96,28 +96,30 @@
 
     static  volatile I2C_CmplCode_t  done;
 
-    static  volatile uint16_t    I2cStart;
+    static  volatile uint16_t   s_I2cStart;
 
-    static  volatile uint16_t    s_I2cErrorCnt;
-    static  volatile uint16_t    s_I2cErrNackCnt;
-    static  volatile uint16_t    s_I2cErrArbLossCnt;
-    static  volatile uint16_t    s_I2cErrUnhandledCnt;
+    static  volatile uint16_t   s_I2cErrorCnt;
+    static  volatile uint16_t   s_I2cErrNackCnt;
+    static  volatile uint16_t   s_I2cErrArbLossCnt;
+    static  volatile uint16_t   s_I2cErrUnhandledCnt;
   
     static  volatile uint16_t   s_RxByteCounter;
     static  volatile uint16_t   s_TxByteCounter;
 
    
 /******************************************************************************
-   Subroutine:    function_name
-   Description:   
-   Inputs:
-   Outputs:
+   Subroutine:    MSP430F5529LP_I2C_Initialize
+   Description:   This function initializes the MSP430F5529LP UCB1 comm
+                  peripheral for I2C Master mode at 50 KHz.
+   Inputs:        None
+   Outputs:       None
 
 ******************************************************************************/
 void MSP430F5529LP_I2C_Initialize(void)
 {
     __disable_interrupt();
 
+    // Reset error collection variables
     s_I2cErrorCnt = 0;
     s_I2cErrNackCnt = 0;
     s_I2cErrArbLossCnt = 0;
@@ -129,7 +131,7 @@ void MSP430F5529LP_I2C_Initialize(void)
 
     UCB1CTL1_bits.UCSWRST  = 1u;      // Disable I2C (in reset)
 
-    // Configure I2C mode
+    // Configure I2C in mater mode
     UCB1CTL0_bits.UCMODEx = 3u;      // Select I2C mode
     UCB1CTL0_bits.UCSYNC = 1u;       // Synchronous mode
     UCB1CTL0_bits.UCMST = 1u;        // Select Master Mode
@@ -141,7 +143,7 @@ void MSP430F5529LP_I2C_Initialize(void)
     UCB1BR1 = 1u;
     UCB1BR0 = 224u;
 
-    // Select the special function mapping for UCB1 I2C Mode
+    // Select the special function mapping for UCB1 I2C Mode pins
     P4DIR_bits.P4DIR1 = 0;      // set P4.1 as Input
     P4SEL_bits.P4SEL1 = 1;      // select P4.1 as (I2C) SDA
     P4DIR_bits.P4DIR2 = 1;      // set P4.2 as Input
@@ -168,7 +170,7 @@ void MSP430F5529LP_I2C_Initialize(void)
     // device can continue to hold SDA low, which will create a permanent
     // arbitration loss condition. Note that the MSP430 can sometimes be the
     // device holding the bus, and can deadlock itself.
-    I2C_Recovery();
+    I2cRecovery();
 
     // The bus may have been released above because the slave transitioned to
     // sending a 1, but may not have completed the transaction. Set the STOP
@@ -195,7 +197,7 @@ void I2C_Read(uint8_t address, uint8_t *p_reg, uint16_t bytes)
 
     if (1u == UCB1STAT_bits.UCBBUSY)
     {
-        I2C_Recovery();
+        I2cRecovery();
     }
   
    UCB1I2CSA_bits.I2CSAx = address;
@@ -209,14 +211,14 @@ void I2C_Read(uint8_t address, uint8_t *p_reg, uint16_t bytes)
    UCB1IE_bits.UCRXIE = 1u;         // enable Rx interrupt
 
    done = I2C_IN_PROGRESS;
-   I2cStart = GetTick();
+   s_I2cStart = GetTick();
    
    while ( (done == I2C_IN_PROGRESS) &&
-           (35 > Elapse(I2cStart, GetTick())) ) {}
+           (35 > Elapse(s_I2cStart, GetTick())) ) {}
 
    if (I2C_COMPLETED_SUCCESS != done)
    {
-       I2C_Recovery();
+       I2cRecovery();
    }
 
    return;
@@ -235,16 +237,16 @@ void I2C_Write(uint8_t address, uint8_t * p_reg, uint16_t bytes)
     // It is possible to complete the final ISR transaction, and queue up a new
     // i2c transaction while the last one is being completed. This is typically
     // due to the i2c module writing out the stop condition to the bus.
-    I2cStart = GetTick();
+    s_I2cStart = GetTick();
     while( (UCB1STAT_bits.UCBBUSY) &&
            (UCB1CTL1_bits.UCTXSTP) &&
-           (35 > Elapse(I2cStart, GetTick())) ) {};
+           (35 > Elapse(s_I2cStart, GetTick())) ) {};
    
     // If our last transaction is complete, but the bus is still busy,
     // something is very wrong. Attempt to recover the bus before continuing.
     if (1u == UCB1STAT_bits.UCBBUSY)
     {
-        I2C_Recovery();
+        I2cRecovery();
     }
      
     UCB1I2CSA_bits.I2CSAx = address;
@@ -256,10 +258,10 @@ void I2C_Write(uint8_t address, uint8_t * p_reg, uint16_t bytes)
     UCB1IE_bits.UCTXIE = 1u;        // enable Tx interrupt
    
     done = I2C_IN_PROGRESS;
-    I2cStart = GetTick();
+    s_I2cStart = GetTick();
 
     while ( (I2C_IN_PROGRESS == done) &&
-            (35 > Elapse(I2cStart, GetTick())) ) {}
+            (35 > Elapse(s_I2cStart, GetTick())) ) {}
 
     return;
 }
@@ -272,7 +274,7 @@ void I2C_Write(uint8_t address, uint8_t * p_reg, uint16_t bytes)
    Outputs:
 
 ******************************************************************************/
-static void I2C_Recovery(void)
+static void I2cRecovery(void)
 {
     uint8_t  RstCnt;
 

@@ -94,6 +94,8 @@
     void pinSelect(uint8_t pin, pinSelect_enum pSelect);
 
     uint8_t pinInput(uint8_t pin);
+
+    uint8_t pinValid(uint8_t pin);
    
 
 /******************************************************************************

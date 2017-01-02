@@ -461,6 +461,88 @@ uint8_t pinInput(uint8_t pin)
 }
 
 
+/******************************************************************************
+    Subroutine:     pinValid
+    Description:    Function to determine if the specified GPIO pin is valid.
+    Inputs:         pin (uint8_t) is a value between 1 and 80, corresponding to
+                    a GPIO pin, based on the physical package.
+    Outputs:        uint8_t return value.
+                    For legal pin values, the return value will be 1.
+                    For illegal pin values, the return value will be 0.
+
+******************************************************************************/
+uint8_t pinValid(uint8_t pin)
+{
+    switch(pin)
+    {
+        case (1):  //P6.4, CB4, A4
+        case (2):  //P6.5, CB5, A5
+        case (3):  //P6.6, CB6, A6
+        case (4):  //P6.7, CB7, A7
+        case (5):  //P7.0, CB8, A12
+        case (6):  //P7.1, CB9, A13
+        case (7):  //P7.2, CB10, A14
+        case (8):  //P7.3, CB11, A15
+        case (9):  //P5.0, A8, VREF+, VeREF+
+        case (10): //P5.1, A9, VREF-, VeREF-
+        case (12): //P5.4, XIN
+        case (13): //P5.5, XOUT
+        case (15): //P8.0
+        case (16): //P8.1
+        case (17): //P8.2
+        case (21): //P1.0, TA0CLK, ACLK
+        case (22): //P1.1, TA0.0
+        case (23): //P1.2, TA0.1
+        case (24): //P1.3, TA0.2
+        case (25): //P1.4, TA0.3
+        case (26): //P1.5, TA0.4
+        case (27): //P1.6, TA1CLK, CBOUT
+        case (28): //P1.7, TA1.0
+        case (29): //P2.0, TA1.1
+        case (30): //P2.1, TA1.2
+        case (31): //P2.2, TA2CLK, SMCLK
+        case (32): //P2.3, TA2.0
+        case (33): //P2.4, TA2.1
+        case (34): //P2.5, TA2.2
+        case (35): //P2.6, RTCCLK, DMAE0
+        case (36): //P2.7, UCB0STE, UCA0CLK
+        case (37): //P3.0, UCB0SIMO, UCB0SDA
+        case (38): //P3.1, UCB0SOMI, UCB0SCL
+        case (39): //P3.2, UCB0CLK, UCA0STE
+        case (40): //P3.3, UCA0TXD, UCA0SIMO
+        case (41): //P3.4, UCA0RXD, UCA0SOMI
+        case (42): //P3.5, TB0.5
+        case (43): //P3.6, TB0.6
+        case (44): //P3.7, TB0OUTH, SVMOUT
+        case (45): //P4.0, PM_UCB1STE, PM_UCA1CLK
+        case (46): //P4.1, PM_UCB1SIMO, PM_UCB1SDA
+        case (47): //P4.2, PM_UCB1SOMI, PM_UCB1SCL
+        case (48): //P4.3, PM_UCB1CLK, PM_UCA1STE
+        case (51): //P4.4, PM_UCA1TXD, PM_UCA1SIMO
+        case (52): //P4.5, PM_UCA1RXD, PM_UCA1SOMI
+        case (53): //P4.6, PM_NONE
+        case (54): //P4.7, PM_NONE
+        case (55): //P5.6, TB0.0
+        case (56): //P5.7, TB0.1
+        case (57): //P7.4, TB0.2
+        case (58): //P7.5, TB0.3
+        case (59): //P7.6, TB0.4
+        case (60): //P7.7, TB0CLK, MCLK
+        case (69): //P5.2, XT2IN
+        case (70): //P5.3, XT2OUT
+        case (77): //P6.0, CB0, A0
+        case (78): //P6.1, CB1, A1
+        case (79): //P6.2, CB2, A2
+        case (80): //P6.3, CB3, A3
+        {
+            return 1u;
+        }
+
+        default: return 0u;
+    }
+}
+
+
 
 /******************************************************************************
 	End of File: MSP430F5529LP_GPIO.c

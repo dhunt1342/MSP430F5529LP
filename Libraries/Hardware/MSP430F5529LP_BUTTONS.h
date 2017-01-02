@@ -44,13 +44,26 @@
     PUBLIC DEFINITIONS
 ******************************************************************************/
 
-    typedef void (*BUTTON_Callback_t) (void);
+    // These definitions provide the pin numbers for the buttons on the
+    // MSP430F5529LP launchpad board.
 
-    typedef struct
+    #define MSP430F5529LP_BUTTON1     30      // P2IN_bits.P2IN1
+    #define MSP430F5529LP_BUTTON2     22      // P1IN_bits.P1IN1
+
+    // This typedef is required to let the compiler know the type of function
+    // pointer used in the function prototypes below.
+
+    typedef void (*ButtonCallback_t) (void);
+
+    typedef volatile union
     {
-        uint16_t    single_press    :1;
-        uint16_t    double_click    :1;
-        uint16_t    long_press      :1;
+        uint16_t reg;
+        struct
+        {
+            uint16_t    single_press    :1;
+            uint16_t    double_click    :1;
+            uint16_t    long_press      :1;
+        };
     }ButtonEvents_t;
 
 
@@ -58,17 +71,24 @@
     PUBLIC FUNCTION PROTOTYPES
 ******************************************************************************/
 
-    extern void MSP430F5529LP_BUTTONS_Initialize(void);
+    void MSP430F5529LP_BUTTONS_Initialize(uint16_t  ButtonSrvcInterval_ms,
+                                          uint16_t  ButtonDbncThresh_cnt,
+                                          uint16_t  ButtonDblClickTimeout_ms,
+                                          uint16_t  ButtonLngPressTimeout_ms);
 
-    extern void Set_BUTTON_Callback(void *callback);
+    void Set_Button_Callback(uint16_t index,
+                             uint16_t pin,
+                             uint16_t polarity,
+                             ButtonCallback_t callback);
+
+    ButtonEvents_t Get_Button_Status(uint16_t index);
+
+    void Clear_Button_Status(uint16_t index);
 
 
 /******************************************************************************
     PUBLIC VARIABLES (extern)
 ******************************************************************************/
-
-    extern volatile ButtonEvents_t   Button1Events;
-    extern volatile ButtonEvents_t   Button2Events;
 
 
 /******************************************************************************

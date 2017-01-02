@@ -60,9 +60,9 @@
 
     typedef void (*TIMERA2_Button_Service) (void);
 
-    TIMERA2_Button_Service Button_Service;
+    static TIMERA2_Button_Service TimerA2_ButtonService;
 
-    static uint16_t Button_Interval;
+    static uint16_t TimerA2_ButtonInterval;
 
 
 /******************************************************************************
@@ -111,8 +111,8 @@ void MSP430F5529LP_TIMERA2_Initialize(void)
     s_CurrentTick32 = 0; 
 
     // Initialize the button service (as inactive)
-    Button_Service = NULL;
-    Button_Interval = 16;
+    TimerA2_ButtonService = (TIMERA2_Button_Service)NULL;
+    TimerA2_ButtonInterval = 16;
 }
 
 
@@ -131,13 +131,13 @@ void __attribute__((__interrupt__(TIMER2_A0_VECTOR))) TIMER2_A0_ISR(void)
     s_CurrentTick32++;
 
     // Check to see if button service was enabled. If so...
-    if (NULL != Button_Service)
+    if (NULL != TimerA2_ButtonService)
     {
         // and if the current tick is at the button interval...
-        if (0 == (s_CurrentTick % Button_Interval))
+        if (0 == (s_CurrentTick % TimerA2_ButtonInterval))
         {
             // call the button service in the button library module
-            Button_Service();
+            TimerA2_ButtonService();
         }
     }
 }
@@ -343,10 +343,10 @@ uint32_t Expired32(uint32_t duration, uint32_t start, uint32_t stop)
     Outputs:        None
 
 ******************************************************************************/
-void Set_Button_Service(uint16_t intvl_ms, void *callback)
+void Set_Button_Service(uint16_t intvl_ms, TIMERA2_Button_Service callback)
 {
-    Button_Service = (TIMERA2_Button_Service) callback;
-    Button_Interval = intvl_ms;
+    TimerA2_ButtonService = callback;
+    TimerA2_ButtonInterval = intvl_ms;
 }
 
 

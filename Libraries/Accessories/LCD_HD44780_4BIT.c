@@ -25,11 +25,14 @@
 
 /* ===========================================================================*/
 /*
- * FileName:      LCD_HD44780_I2C.c
+ * FileName:      LCD_HD44780_4BIT.c
  *
- * This file provides functions for the 20x4 character LCD modules that use the
- * The HD44780x dot-matrix liquid crystal display controller and driver in the
- * 4-bit parallel interface mode, driven by an I2C expander interface.
+ * This example demonstrates writing to a 20x4 character LCD module based on
+ * the HD44780 display controller using the 4-bit parallel interface mode. The
+ * example uses a blocking delay to set the update speed of an 8-bit up-counter
+ * which is displayed on decimal, hexadecimal, and binary formats on the LCD.
+ * This example can be used to explore display characteristics such as refresh
+ * rate.
  *
  * Version 1.0
  *
@@ -40,10 +43,10 @@
 
 #include "MSP430F5529LP.h"
 #include "MSP430F5529LP_CLOCK.h"
+#include "MSP430F5529LP_TIMERA2.h"
 #include "MSP430F5529LP_GPIO.h"
-#include "MSP430F5529LP_I2C.h"
 
-#include "LCD_HD44780_I2C.h"
+#include "LCD_HD44780_4BIT.h"
 
 #include "ctype.h"
 #include "stdio.h"
@@ -68,12 +71,12 @@
     // These delays are from the HD44780 datasheet for various hold times,
     // minimum pulse width values, etc.
 
-    #define LCD_DELAY_5ns       __delay_cycles((010e-9)/(1.0/CLOCK_FREQ))
-    #define LCD_DELAY_10ns      __delay_cycles((020e-9)/(1.0/CLOCK_FREQ))
-    #define LCD_DELAY_40ns      __delay_cycles((080e-9)/(1.0/CLOCK_FREQ))
-    #define LCD_DELAY_80ns      __delay_cycles((160e-9)/(1.0/CLOCK_FREQ))
-    #define LCD_DELAY_230ns     __delay_cycles((460e-9)/(1.0/CLOCK_FREQ))
-    #define LCD_DELAY_270ns     __delay_cycles((540e-9)/(1.0/CLOCK_FREQ))
+    #define LCD_DELAY_5ns       __delay_cycles((005e-9)/(1.0/CLOCK_FREQ))
+    #define LCD_DELAY_10ns      __delay_cycles((010e-9)/(1.0/CLOCK_FREQ))
+    #define LCD_DELAY_40ns      __delay_cycles((040e-9)/(1.0/CLOCK_FREQ))
+    #define LCD_DELAY_80ns      __delay_cycles((080e-9)/(1.0/CLOCK_FREQ))
+    #define LCD_DELAY_230ns     __delay_cycles((230e-9)/(1.0/CLOCK_FREQ))
+    #define LCD_DELAY_270ns     __delay_cycles((270e-9)/(1.0/CLOCK_FREQ))
     #define LCD_DELAY_150us     __delay_cycles((150e-6)/(1.0/CLOCK_FREQ))
     #define LCD_DELAY_50us      __delay_cycles((050e-6)/(1.0/CLOCK_FREQ))
     #define LCD_DELAY_2ms       __delay_cycles((002e-3)/(1.0/CLOCK_FREQ))
@@ -88,28 +91,10 @@
     } LcdRegType_enum;
 
     typedef enum
-    {
-        UPPER_NIBBLE = 0,
-        LOWER_NIBBLE = 1
-    } LcdNibble_enum;
-
-    typedef union
-    {
-        uint8_t     reg;
-        struct
-        {
-            uint8_t    RS        : 1;    // Register Select bit
-            uint8_t    RW        : 1;    // Read / Write Select bit
-            uint8_t    EN        : 1;    // Enable strobe (starts read/write)
-            uint8_t    BL        : 1;    // Backlight
-            uint8_t    D4        : 1;    // Data port bit 4
-            uint8_t    D5        : 1;    // Data port bit 5
-            uint8_t    D6        : 1;    // Data port bit 6
-            uint8_t    D7        : 1;    // Data port bit 7
-        } bits;
-    } I2cExpndrBits_t;
-
-
+	{
+		UPPER_NIBBLE = 0,
+		LOWER_NIBBLE = 1
+	} LcdNibble_enum;
 
 
 /******************************************************************************
@@ -119,6 +104,10 @@
     static void LcdWriteReg(uint16_t value, LcdRegType_enum reg);
 
     static void LcdWrite4bits(uint16_t value, LcdNibble_enum nibble);
+
+    static void SetPinsForRead(void);
+
+    static void SetPinsForWrite(void);
 
 
 /******************************************************************************
@@ -135,52 +124,69 @@
 //
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+   static   uint16_t    s_LcdStartTime;
 
-    static uint16_t     s_str_size;
-    static char         s_lcd_string[40];
-    static char*        s_lcd_stringPtr;
+   static   uint16_t    s_LCD_RS;
+   static   uint16_t    s_LCD_RW;
+   static   uint16_t    s_LCD_EN;
+   static   uint16_t    s_LCD_D4;
+   static   uint16_t    s_LCD_D5;
+   static   uint16_t    s_LCD_D6;
+   static   uint16_t    s_LCD_D7;
 
-    static I2cExpndrBits_t      I2cBits;
-
-    static uint16_t     s_LcdI2cAddr;
+   static	uint16_t  	s_str_size;
+   static	char        s_lcd_string[40];
+   static	char*       s_lcd_stringPtr;
 
    
 /******************************************************************************
     Subroutine:     LCD_Initialize
     Description:    This function initializes the LCD display.
-    Inputs:         uint16_t LcdI2cAddr: defines the address of the I2C exander
-                    IC. Typically this will be 0x27 (based on the LCD devices
-                    available at the time of writing this code). This value is
-                    provided in the .h file as LCD_I2C_ADDR.
-                    uint16_t LcdBacklightEn_enum: This value determines whether
-                    the backlight is turned on or off. This must be defined as
-                    the backlight is controlled by the I2C expanderIC.
+    Inputs:         uint16_t LcdPin_RS: Pin number of the Register Select pin
+                    uint16_t LcdPin_RW: Pin number of the Read/Write pin
+                    uint16_t LcdPin_EN: Pin number of the Enable pin
+                    uint16_t LcdPin_D4: Pin number of data bus pin 4
+                    uint16_t LcdPin_D5: Pin number of data bus pin 5
+                    uint16_t LcdPin_D6: Pin number of data bus pin 6
+                    uint16_t LcdPin_D7: Pin number of data bus pin 7
+                    NOTE: All pin numbers are package pins (see GPIO hardware
+                    library for more information)
     Outputs:        None
 
 ******************************************************************************/
-void LCD_Initialize(uint16_t LcdI2cAddr,
-                    uint16_t LcdBacklightEn_enum)
+void LCD_Initialize(uint16_t LcdPin_RS,
+                    uint16_t LcdPin_RW,
+                    uint16_t LcdPin_EN,
+                    uint16_t LcdPin_D4,
+                    uint16_t LcdPin_D5,
+                    uint16_t LcdPin_D6,
+                    uint16_t LcdPin_D7)
 {
-    // Assign I2C address
-    s_LcdI2cAddr = LcdI2cAddr;
+	// Save the LCD pin assignments to file scope variables
+    s_LCD_RS = LcdPin_RS;
+    s_LCD_RW = LcdPin_RW;
+    s_LCD_EN = LcdPin_EN;
+	s_LCD_D4 = LcdPin_D4;
+	s_LCD_D5 = LcdPin_D5;
+	s_LCD_D6 = LcdPin_D6;
+	s_LCD_D7 = LcdPin_D7;
 
-    // SEE PAGE 45/46 OF HD44780U DATASHEET FOR INITIALIZATION SPECIFICATION!
-    // need at least 40ms after power rises above 2.7V before sending commands.
-    LCD_DELAY_100ms;
+	// Assign the direction of the LCD control lines. These will always be
+	// outputs from the MCU
+	pinDirection(s_LCD_EN, OUTPUT);
+	pinDirection(s_LCD_RS, OUTPUT);
+	pinDirection(s_LCD_RW, OUTPUT);
 
-    // Set initial state of the variable used to reflect remote expander ports.
-    // Write this to i2c expander to reset the LCD interface. This also ensures
-    // that RS and RW = 0 before sending initialization sequence.
-    I2cBits.reg = 0;
+	pinOutput(s_LCD_EN, 0);     // Default state, EN = 0
 
-    // Set the backlight on or off as requested
-    I2cBits.bits.BL = LcdBacklightEn_enum;    // Set Backlight ON/OFF
+	// Set data lines as outputs
+	SetPinsForWrite();
 
-    I2C_Write(s_LcdI2cAddr, &I2cBits.reg, 1);
-    LCD_DELAY_40ns;
-
-    // put the LCD into 4 bit mode. This is according to the hitachi
-    // HD44780 datasheet figure 24, pg 46
+	// Wait 100 ms for Internal LCD Initialization to complete
+	LCD_DELAY_100ms;
+   
+	// put the LCD into 4 bit mode. This is according to the hitachi
+	// HD44780 datasheet figure 24, pg 46
     LcdWrite4bits(0x03, LOWER_NIBBLE);
     LCD_DELAY_5ms;
     LcdWrite4bits(0x03, LOWER_NIBBLE);
@@ -312,17 +318,17 @@ void LCD_Print(const char * format, ...)
 ******************************************************************************/
 void LcdWriteReg(uint16_t value, LcdRegType_enum reg)
 {
-    I2cBits.bits.EN = 0;        // EN = 0, should already be true
-    I2C_Write(s_LcdI2cAddr, &I2cBits.reg, 1);
+    static uint16_t     busy;
+
+    pinOutput(s_LCD_EN, 0);     // EN = 0, should already be true
 
     // In case it wasn't, hold enable low for the minimum address hold time
     // before changing RS or RW.
     LCD_DELAY_10ns;
 
-    I2cBits.bits.RS = reg;      // RS = 0 for Instruction registers
+    pinOutput(s_LCD_RS, reg);   // RS = 0 for Instruction registers
                                 // RS = 1 for Data registers
-    I2cBits.bits.RW = 0;        // RW = 0, select Write operation
-    I2C_Write(s_LcdI2cAddr, &I2cBits.reg, 1);
+    pinOutput(s_LCD_RW, 0);     // RW = 0, select Write operation
 
     // After changing RS and RW, delay for the minimum address setup time
     // before changing the enable state.
@@ -333,6 +339,34 @@ void LcdWriteReg(uint16_t value, LcdRegType_enum reg)
 
     // commands require at least 37us to settle.
     if (COMMAND == reg) { LCD_DELAY_50us; }
+
+    SetPinsForRead();
+
+    pinOutput(s_LCD_RS, 0);     // RS = 0; Select Instruction reg
+    pinOutput(s_LCD_RW, 1);     // RW = 0, select Read operation
+    LCD_DELAY_40ns;
+
+    s_LcdStartTime = GetTick();
+
+    do  // Spin here until busy = False, Or the timeout expires.
+    {
+        pinOutput(s_LCD_EN, 1);     // EN = 1, prepare to read data
+        LCD_DELAY_230ns;
+
+        busy = pinInput(s_LCD_D7);  // Read BUSY flag
+
+        pinOutput(s_LCD_EN, 0);     // EN = 0, strobe data write
+        LCD_DELAY_270ns;
+
+        // In 4-bit mode the 2nd nibble must be read even if it isn't used.
+        pinOutput(s_LCD_EN, 1);     // EN = 1, prepare to read data
+        LCD_DELAY_230ns;
+        pinOutput(s_LCD_EN, 0);     // EN = 0, strobe data write
+        LCD_DELAY_270ns;
+  
+    } while ( busy  && (!(Expired(1000, s_LcdStartTime, GetTick()))) );
+  
+    SetPinsForWrite();
 
     return;
 }
@@ -351,31 +385,28 @@ void LcdWriteReg(uint16_t value, LcdRegType_enum reg)
 ******************************************************************************/
 void LcdWrite4bits(uint16_t value, LcdNibble_enum nibble)
 {
-    I2cBits.bits.EN = 1;                // EN = 1, setup data bus
-    I2C_Write(s_LcdI2cAddr, &I2cBits.reg, 1);
+    pinOutput(s_LCD_EN, 1);     // EN = 1, prepare to write data
 
     // Set the requested nibble to the data bus
     if (UPPER_NIBBLE == nibble)
     {
-        I2cBits.bits.D4 = ((value >> 4) & 1);
-        I2cBits.bits.D5 = ((value >> 5) & 1);
-        I2cBits.bits.D6 = ((value >> 6) & 1);
-        I2cBits.bits.D7 = ((value >> 7) & 1);
+        pinOutput(s_LCD_D4, ((value >> 4) & 1));
+        pinOutput(s_LCD_D5, ((value >> 5) & 1));
+        pinOutput(s_LCD_D6, ((value >> 6) & 1));
+        pinOutput(s_LCD_D7, ((value >> 7) & 1));
     }
     else
     {
-        I2cBits.bits.D4 = (value & 1);
-        I2cBits.bits.D5 = ((value >> 1) & 1);
-        I2cBits.bits.D6 = ((value >> 2) & 1);
-        I2cBits.bits.D7 = ((value >> 3) & 1);
+        pinOutput(s_LCD_D4, (value & 1));
+        pinOutput(s_LCD_D5, ((value >> 1) & 1));
+        pinOutput(s_LCD_D6, ((value >> 2) & 1));
+        pinOutput(s_LCD_D7, ((value >> 3) & 1));
     }
-    I2C_Write(s_LcdI2cAddr, &I2cBits.reg, 1);
 
     // Hold enable high for minimum high level pulse width
     LCD_DELAY_230ns;
 
-    I2cBits.bits.EN = 0;                // EN = 0, strobe data write
-    I2C_Write(s_LcdI2cAddr, &I2cBits.reg, 1);
+    pinOutput(s_LCD_EN, 0);     // EN = 0, strobe data write
 
     // Hold enable low for minimum data hold time (which is only 5 ns), or
     // the value required to ensure that the fastest enable cycle time is
@@ -387,5 +418,46 @@ void LcdWrite4bits(uint16_t value, LcdNibble_enum nibble)
 
 
 /******************************************************************************
-    End of File: LCD_HD44780_I2C.c
+    Subroutine:     SetPinsForRead
+    Description:    This function changes the direction of the data bus pins
+                    to inputs. This is needed to read the busy flag to
+                    determine if the requsted action has completed.
+    Inputs:         None
+    Outputs:        None
+
+******************************************************************************/
+void SetPinsForRead(void)
+{
+    pinDirection(s_LCD_D4, INPUT);
+    pinDirection(s_LCD_D5, INPUT);
+    pinDirection(s_LCD_D6, INPUT);
+    pinDirection(s_LCD_D7, INPUT);
+
+    return;
+}
+
+
+/******************************************************************************
+    Subroutine:     SetPinsForWrite
+    Description:    This function changes the direction of the data bus pins
+                    to outputs. This is needed to write the next request to
+                    the LCD.
+    Inputs:         None
+    Outputs:        None
+
+******************************************************************************/
+void SetPinsForWrite(void)
+{
+    pinDirection(s_LCD_D4, OUTPUT);
+    pinDirection(s_LCD_D5, OUTPUT);
+    pinDirection(s_LCD_D6, OUTPUT);
+    pinDirection(s_LCD_D7, OUTPUT);
+
+    return;
+}
+
+
+
+/******************************************************************************
+	End of File: LCD_HD44780_4bit.c
 ******************************************************************************/
