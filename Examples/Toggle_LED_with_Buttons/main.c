@@ -106,7 +106,7 @@ int main( void )
     Outputs:        None
 
 ******************************************************************************/
-static void initialize(void)
+void initialize(void)
 {
     // ###################################################################
     // Add operating environment initialization here
@@ -122,7 +122,7 @@ static void initialize(void)
     // Enable the Debug LEDs
     P1DIR_bits.P1DIR0 = 1;         // Set P1.0 (LED1) to an Output
     P4DIR_bits.P4DIR7 = 1;         // Set P4.7 (LED2) to an Output
-    P1OUT_bits.P1OUT0 = 0;         // Set P1.0 initial value
+    P1OUT_bits.P1OUT0 = 1;         // Set P1.0 initial value
     P4OUT_bits.P4OUT7 = 1;         // Set P4.7 initial value
 
     // Register the buttons
@@ -139,37 +139,33 @@ static void initialize(void)
 
 /******************************************************************************
     Subroutine:     Button_Callback
-    Description:    This is the callBack function that will be called when
-                    either button generates an event.
+    Description:    This is the CallBack function that will be called when
+                    either of the buttons generates an event.
     Inputs:         None
     Outputs:        None
 
 ******************************************************************************/
 static void Button_Callback(void)
 {
-    static ButtonEvents_t button_status;
+    /* By using Get_Button_Status(index).reg to perform the check, we are
+     * looking for "any event" to have occurred. In this case, toggling the
+     * correct LED depending on the button pressed.
+     *
+     * IMPORTANT: After taking the appropriate actions, the events flags
+     * need to be cleared by using Clear_Button_Status(index).
+     */
 
-
-    button_status = Get_Button_Status(BUTTON1);
-
-    if (button_status.reg)
+    if (0u != Get_Button_Status(BUTTON1).reg)
     {
         P1OUT_bits.P1OUT0 ^= 1;     // toggle P1.0 (LED1)
+        Clear_Button_Status(BUTTON1);
     }
 
-    Clear_Button_Status(BUTTON1);
-
-
-    button_status = Get_Button_Status(BUTTON2);
-
-    if (button_status.reg)
+    if (0u != Get_Button_Status(BUTTON2).reg)
     {
         P4OUT_bits.P4OUT7 ^= 1;     // toggle P4.7 (LED2)
+        Clear_Button_Status(BUTTON2);
     }
-
-    Clear_Button_Status(BUTTON2);
-
-    return;
 }
 
 
